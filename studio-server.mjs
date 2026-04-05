@@ -172,50 +172,24 @@ async function downloadImage(url, destPath, retries = 3) {
  * Returns a local Buffer (PNG).
  */
 async function generateWithGeminiImagen(prompt, width, height, apiKey) {
-  // Gemini Imagen 3 via REST
-  const aspectRatio = width > height ? 'LANDSCAPE' : width < height ? 'PORTRAIT' : 'SQUARE';
-  const body = {
-    instances: [{ prompt: prompt.substring(0, 2000) }],
-    parameters: {
-      sampleCount: 1,
-      aspectRatio: aspectRatio === 'LANDSCAPE' ? '16:9' : aspectRatio === 'PORTRAIT' ? '9:16' : '1:1',
-    },
-  };
+  // Use gemini-2.0-flash-preview-image-generation (free tier, no billing required).
+  // Returns inline base64 image data via generateContent API.
   const res = await fetch(
-    `https://us-central1-aiplatform.googleapis.com/v1/projects/generativelanguage/locations/us-central1/publishers/google/models/imagegeneration@006:predict`,
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-preview-image-generation:generateContent?key=${apiKey}`,
     {
       method: 'POST',
-      headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt.substring(0, 2000) }] }],
+        generationConfig: { responseModalities: ['IMAGE'] },
+      }),
     }
   );
-  // Vertex endpoint requires OAuth — fall through to Gemini generativelanguage API
-  if (!res.ok) {
-    // Use the Gemini Developer API imagen endpoint instead
-    const r2 = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-001:predict?key=${apiKey}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          instances: [{ prompt: prompt.substring(0, 2000) }],
-          parameters: {
-            sampleCount: 1,
-            aspectRatio: aspectRatio === 'LANDSCAPE' ? '16:9' : aspectRatio === 'PORTRAIT' ? '9:16' : '1:1',
-          },
-        }),
-      }
-    );
-    if (!r2.ok) throw new Error(`Gemini Imagen ${r2.status}: ${await r2.text()}`);
-    const d2 = await r2.json();
-    const b64 = d2.predictions?.[0]?.bytesBase64Encoded;
-    if (!b64) throw new Error('Gemini Imagen returned no image data');
-    return Buffer.from(b64, 'base64');
-  }
+  if (!res.ok) throw new Error(`Gemini image ${res.status}: ${await res.text()}`);
   const data = await res.json();
-  const b64 = data.predictions?.[0]?.bytesBase64Encoded;
-  if (!b64) throw new Error('Gemini Imagen returned no image data');
-  return Buffer.from(b64, 'base64');
+  const inlineData = data.candidates?.[0]?.content?.parts?.find(p => p.inlineData)?.inlineData;
+  if (!inlineData?.data) throw new Error('Gemini image: no image data in response');
+  return Buffer.from(inlineData.data, 'base64');
 }
 
 /**
@@ -223,15 +197,17 @@ async function generateWithGeminiImagen(prompt, width, height, apiKey) {
  * Returns a Buffer (JPEG).
  */
 async function generateWithRunwayImage(prompt, width, height, apiKey) {
+  // Runway text_to_image expects pixel-dimension strings, NOT aspect-ratio strings.
+  // Valid values: "1280:720", "720:1280", "1080:1080", "1024:1024" etc.
   const ratioMap = {
-    '1920x1080': '16:9',
-    '1280x720':  '16:9',
-    '768x1365':  '9:16',
-    '1080x1920': '9:16',
-    '1080x1080': '1:1',
+    '1920x1080': '1280:720',
+    '1280x720':  '1280:720',
+    '768x1365':  '720:1280',
+    '1080x1920': '720:1280',
+    '1080x1080': '1080:1080',
   };
   const key = `${width}x${height}`;
-  const ratio = ratioMap[key] || (width > height ? '16:9' : width < height ? '9:16' : '1:1');
+  const ratio = ratioMap[key] || (width > height ? '1280:720' : width < height ? '720:1280' : '1080:1080');
 
   const res = await fetch('https://api.dev.runwayml.com/v1/text_to_image', {
     method: 'POST',
@@ -1145,7 +1121,10 @@ async function getBundle() {
 
 async function getCachedCompositions(serveUrl) {
   if (_compositions) return _compositions;
-  _compositions = await getCompositions(serveUrl);
+  _compositions = await getCompositions(serveUrl, {
+    chromiumOptions: { headless: true, disableWebSecurity: true },
+    ...(BROWSER_EXECUTABLE ? { browserExecutable: BROWSER_EXECUTABLE } : {}),
+  });
   return _compositions;
 }
 

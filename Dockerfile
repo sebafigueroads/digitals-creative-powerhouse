@@ -32,6 +32,10 @@ COPY package*.json ./
 
 RUN node --max-old-space-size=4096 $(which npm) ci
 
+# Pre-install Remotion's Chrome Headless Shell during build so it never
+# downloads at container start-up (which blocks the render at 0%).
+RUN npx remotion browser install || true
+
 COPY . .
 
 RUN mkdir -p public/renders public/clients public/assets public/graphics clients .tmp && \

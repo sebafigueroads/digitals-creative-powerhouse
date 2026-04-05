@@ -1,11 +1,12 @@
-FROM node:20-slim
+FROM node:20-bookworm-slim
 
 # Install system dependencies for Remotion (Chromium headless) + ffmpeg
 RUN apt-get update && apt-get install -y \
     ffmpeg \
     chromium \
     fonts-liberation \
-    libasound2 \
+    fonts-noto-color-emoji \
+    libasound2t64 \
     libatk-bridge2.0-0 \
     libatk1.0-0 \
     libcups2 \
@@ -22,6 +23,7 @@ RUN apt-get update && apt-get install -y \
     libxshmfence1 \
     xdg-utils \
     ca-certificates \
+    wget \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
@@ -29,8 +31,8 @@ WORKDIR /app
 # Copy package files first for layer caching
 COPY package*.json ./
 
-# Install dependencies
-RUN npm ci --omit=dev
+# Install ALL dependencies (including devDeps needed by Remotion bundler at runtime)
+RUN npm ci
 
 # Copy source
 COPY . .
@@ -38,7 +40,11 @@ COPY . .
 # Create required runtime directories
 RUN mkdir -p public/renders public/clients public/assets public/graphics clients .tmp
 
-# Environment defaults (override in Dokploy)
+# Tell Remotion where Chromium is
+ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
+ENV CHROME_PATH=/usr/bin/chromium
+
+# Server config
 ENV NODE_ENV=production
 ENV PORT=4000
 ENV HOST=0.0.0.0

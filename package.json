@@ -1,13 +1,15 @@
 {
   "name": "my-video",
   "version": "1.0.0",
-  "description": "My Remotion video",
+  "description": "Digitals Creative Powerhouse — AI Video & Graphics Studio",
   "repository": {},
   "license": "UNLICENSED",
   "private": true,
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
+    "@remotion/bundler": "4.0.443",
     "@remotion/cli": "4.0.443",
+    "@remotion/renderer": "4.0.443",
     "@remotion/tailwind-v4": "4.0.443",
     "axios": "^1.14.0",
     "cheerio": "^1.2.0",
@@ -29,19 +31,17 @@
   },
   "scripts": {
     "dev": "remotion studio",
-    "build": "remotion bundle",
+    "build": "echo 'No build step — server bundles Remotion at runtime'",
+    "start": "node studio-server.mjs",
+    "studio": "node studio-server.mjs",
+    "studio:dev": "node --watch studio-server.mjs",
     "upgrade": "remotion upgrade",
     "lint": "eslint src && tsc",
     "create-client-video": "node create-client-video.mjs",
-    "create-client-video:auto": "node create-client-video.mjs --auto",
     "generate-audio": "node generate-audio.mjs",
     "generate-narration": "node generate-narration.mjs",
     "generate-music": "node generate-music.mjs",
-    "render-frames": "node render-frames.mjs",
-    "render-frames:stitch": "STITCH=1 node render-frames.mjs",
-    "start": "node studio-server.mjs",
-    "studio": "node studio-server.mjs",
-    "studio:dev": "node --watch studio-server.mjs"
+    "render-frames": "node render-frames.mjs"
   },
   "sideEffects": [
     "*.css"

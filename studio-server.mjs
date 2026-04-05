@@ -41,6 +41,11 @@ const FFMPEG = process.env.FFMPEG_PATH || (process.platform === 'darwin' ? '/opt
 // In Docker/production: set BASE_URL=https://yourdomain.com
 // In dev: auto-detects localhost
 const BASE_URL = process.env.BASE_URL || `http://localhost:${PORT}`;
+
+// Remotion: use system Chromium in Docker (set via PUPPETEER_EXECUTABLE_PATH or CHROME_PATH)
+const BROWSER_EXECUTABLE = process.env.PUPPETEER_EXECUTABLE_PATH
+  || process.env.CHROME_PATH
+  || (process.platform === 'darwin' ? null : '/usr/bin/chromium'); // null = let Remotion auto-detect on Mac
 const CLIENTS_DIR = path.join(__dirname, "clients");
 const PUBLIC_DIR  = path.join(__dirname, "public");
 const RENDERS_DIR = path.join(PUBLIC_DIR, "renders");
@@ -1691,7 +1696,8 @@ async function renderVideoFrames({
     outputDir: framesDir,
     imageFormat: "jpeg",
     jpegQuality: 90,
-    inputProps: componentProps, // pass both ways for belt-and-suspenders
+    inputProps: componentProps,
+    ...(BROWSER_EXECUTABLE ? { browserExecutable: BROWSER_EXECUTABLE } : {}),
     onFrameUpdate: (frame) => {
       if (frame % 10 === 0 && onProgress) {
         const pct = Math.round(60 + (frame / durationFrames) * 28);
@@ -2190,6 +2196,7 @@ app.post('/api/render/graphic', async (req, res) => {
         codec: 'h264',
         outputLocation: outPath,
         inputProps: graphicProps,
+        ...(BROWSER_EXECUTABLE ? { browserExecutable: BROWSER_EXECUTABLE } : {}),
       });
       return res.json({ success: true, url: `/graphics/${filename}`, filename });
     }
@@ -2205,6 +2212,7 @@ app.post('/api/render/graphic', async (req, res) => {
       output: outPath,
       inputProps: graphicProps,
       imageFormat: 'png',
+      ...(BROWSER_EXECUTABLE ? { browserExecutable: BROWSER_EXECUTABLE } : {}),
     });
 
     res.json({ success: true, url: `/graphics/${filename}`, filename });
@@ -2253,7 +2261,7 @@ app.post('/api/render/carousel', async (req, res) => {
       const filename = `carousel-${clientId}-${timestamp}-${i + 1}.png`;
       const outPath  = path.join(GRAPHICS_DIR, filename);
 
-      await renderStill({ composition: overriddenComp, serveUrl, output: outPath, inputProps: graphicProps, imageFormat: 'png' });
+      await renderStill({ composition: overriddenComp, serveUrl, output: outPath, inputProps: graphicProps, imageFormat: 'png', ...(BROWSER_EXECUTABLE ? { browserExecutable: BROWSER_EXECUTABLE } : {}) });
       urls.push({ slide: i + 1, url: `/graphics/${filename}`, filename });
     }
 
@@ -2341,7 +2349,7 @@ app.post('/api/click-to-ad', async (req, res) => {
             const ts = Date.now();
             const fname = `cta-${clientId}-${gType}-${ts}.png`;
             const outP  = path.join(GRAPHICS_DIR, fname);
-            await renderStill({ composition: oc, serveUrl, output: outP, inputProps: props, imageFormat: 'png' });
+            await renderStill({ composition: oc, serveUrl, output: outP, inputProps: props, imageFormat: 'png', ...(BROWSER_EXECUTABLE ? { browserExecutable: BROWSER_EXECUTABLE } : {}) });
             graphicsResults.push({ type: gType, url: `/graphics/${fname}` });
           } catch (e) { console.warn('Click-to-Ad graphic error:', e.message); }
         }
@@ -2408,7 +2416,7 @@ app.post('/api/render/graphic-variants', async (req, res) => {
       const fname = `variant-${clientId}-${timestamp}-${i + 1}.png`;
       const outPath = path.join(GRAPHICS_DIR, fname);
       try {
-        await renderStill({ composition: oc, serveUrl, output: outPath, inputProps: props, imageFormat: 'png' });
+        await renderStill({ composition: oc, serveUrl, output: outPath, inputProps: props, imageFormat: 'png', ...(BROWSER_EXECUTABLE ? { browserExecutable: BROWSER_EXECUTABLE } : {}) });
         results.push({ label: v.label, type: v.type, bgStyle: v.bgStyle, url: `/graphics/${fname}` });
       } catch (e) {
         results.push({ label: v.label, type: v.type, bgStyle: v.bgStyle, error: e.message });
@@ -2475,7 +2483,7 @@ app.post('/api/ai-edit', async (req, res) => {
       const oc = { ...comp, width: w, height: h, durationInFrames: 1, fps: 30, defaultProps: mergedProps, props: mergedProps };
       const fname = `edited-${clientId}-${Date.now()}.png`;
       const outPath = path.join(GRAPHICS_DIR, fname);
-      await renderStill({ composition: oc, serveUrl, output: outPath, inputProps: mergedProps, imageFormat: 'png' });
+      await renderStill({ composition: oc, serveUrl, output: outPath, inputProps: mergedProps, imageFormat: 'png', ...(BROWSER_EXECUTABLE ? { browserExecutable: BROWSER_EXECUTABLE } : {}) });
       return res.json({ success: true, url: `/graphics/${fname}`, updatedProps: mergedProps });
     } catch (err) {
       return res.status(500).json({ success: false, error: err.message });
@@ -3364,7 +3372,7 @@ app.post('/api/render/content-grid', async (req, res) => {
       const outPath = path.join(GRAPHICS_DIR, fname);
 
       try {
-        await renderStill({ composition: oc, serveUrl, output: outPath, inputProps: graphicProps, imageFormat: 'png' });
+        await renderStill({ composition: oc, serveUrl, output: outPath, inputProps: graphicProps, imageFormat: 'png', ...(BROWSER_EXECUTABLE ? { browserExecutable: BROWSER_EXECUTABLE } : {}) });
         items.push({ label: `${plan.layout}-${plan.bgStyle}`, url: `/graphics/${fname}`, plan });
       } catch (e) {
         console.warn(`⚠️  Content grid render ${i + 1} failed:`, e.message);

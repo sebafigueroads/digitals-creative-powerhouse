@@ -1,0 +1,16 @@
+[phases.setup]
+nixPkgs = ["nodejs_20", "ffmpeg", "chromium", "nss", "nspr", "atk", "cups", "dbus", "libdrm", "mesa", "gtk3", "pango", "xorg.libXcomposite", "xorg.libXdamage", "xorg.libXfixes", "xorg.libXrandr", "xorg.libxshmfence"]
+
+[phases.install]
+cmds = ["npm ci"]
+
+[phases.build]
+cmds = ["echo 'No build step needed'"]
+
+[start]
+cmd = "node studio-server.mjs"
+
+[variables]
+NODE_ENV = "production"
+FFMPEG_PATH = "ffmpeg"
+PUPPETEER_EXECUTABLE_PATH = "chromium"

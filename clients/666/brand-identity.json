@@ -1,0 +1,24 @@
+{
+  "clientId": "666",
+  "displayName": "acuaia",
+  "website": "https://www.acuaia.com/",
+  "description": "",
+  "colors": {
+    "primary": "#156df9",
+    "secondary": "#ededed",
+    "background": "#0f172a",
+    "bgAlt": "#1e293b",
+    "bgSoft": "#0f172a",
+    "heading": "#f8fafc",
+    "body": "#cbd5e1",
+    "muted": "#64748b",
+    "card": "#1e293b",
+    "border": "rgba(0,0,0,0.1)"
+  },
+  "fonts": {
+    "display": "Impact, sans-serif",
+    "body": "system-ui, sans-serif"
+  },
+  "googleFonts": "",
+  "gradient": "linear-gradient(135deg, #156df9 0%, #ededed 100%)"
+}

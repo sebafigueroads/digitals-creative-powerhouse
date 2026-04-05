@@ -1,0 +1,23 @@
+{
+  "clientId": "nuevo-cliente",
+  "displayName": "Nombre del Cliente",
+  "website": "https://ejemplo.com",
+  "colors": {
+    "primary":    "#000000",
+    "secondary":  "#444444",
+    "background": "#FFFFFF",
+    "bgAlt":      "#F5F5F5",
+    "bgSoft":     "#FAFAFA",
+    "heading":    "#111111",
+    "body":       "#444444",
+    "muted":      "#888888",
+    "card":       "#FFFFFF",
+    "border":     "rgba(0,0,0,0.1)"
+  },
+  "fonts": {
+    "display": "Impact, sans-serif",
+    "body":    "-apple-system, BlinkMacSystemFont, sans-serif"
+  },
+  "googleFonts": "",
+  "gradient": "linear-gradient(135deg, #000000 0%, #444444 100%)"
+}

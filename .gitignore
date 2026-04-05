@@ -1,0 +1,28 @@
+node_modules
+dist
+.DS_Store
+.env
+out
+
+# Runtime / temp files
+.tmp/
+public/renders/
+public/assets/scenes/
+public/graphics/
+hapee-frames/
+
+# Large video/audio files
+*.mp4
+*.mov
+*.wav
+hapee-demo*.mp4
+mixed-audio.wav
+
+# API keys — use env vars in production
+.api-keys.json
+
+# Claude Code / AI agent internal files
+.agents/
+.agent/
+.gemini/
+.claude/

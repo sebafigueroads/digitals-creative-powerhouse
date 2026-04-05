@@ -1,0 +1,24 @@
+{
+  "clientId": "digitals",
+  "displayName": "DIGITALS",
+  "website": "https://digitals.cl/",
+  "description": "",
+  "colors": {
+    "primary": "#ffffff",
+    "secondary": "#000000",
+    "background": "#FFFFFF",
+    "bgAlt": "#F5F5F5",
+    "bgSoft": "#FAFAFA",
+    "heading": "#111111",
+    "body": "#444444",
+    "muted": "#888888",
+    "card": "#FFFFFF",
+    "border": "rgba(0,0,0,0.1)"
+  },
+  "fonts": {
+    "display": "Impact, sans-serif",
+    "body": "system-ui, sans-serif"
+  },
+  "googleFonts": "",
+  "gradient": "linear-gradient(135deg, #ffffff 0%, #000000 100%)"
+}

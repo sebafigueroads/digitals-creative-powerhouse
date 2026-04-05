@@ -1,0 +1,19 @@
+{
+  "_comment": "Fill this file before running: npm run create-client-video",
+
+  "clientId": "hapee",
+
+  "script": "¿Estás harto de estos problemas?\n\nHapee... la solución ALL IN ONE, que hará que tu negocio funcione como una máquina de ventas, las 24 horas, los 7 días, impulsada con Inteligencia Artificial.\n\nEl único problema que tendrás... es un Hapee problem.",
+
+  "videoType": "Ad",
+
+  "musicMood": "Cinematic",
+
+  "sfxOnCta": true,
+
+  "outputFilename": "hapee-demo-final.mp4",
+
+  "_videoTypeOptions":  ["Ad", "Explainer", "Reel", "Testimonial", "ProductDemo"],
+  "_musicMoodOptions":  ["Corporate", "Hype", "Cinematic", "Chill", "Dramatic", "Upbeat"],
+  "_clientIdNote":      "Must match a folder inside /clients/. E.g. 'hapee' → /clients/hapee/"
+}

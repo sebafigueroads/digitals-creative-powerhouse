@@ -1,0 +1,23 @@
+{
+  "clientId": "hapee",
+  "displayName": "Hapee",
+  "website": "https://hapee.ai",
+  "colors": {
+    "primary":    "#FA5000",
+    "secondary":  "#CD2349",
+    "background": "#FFFFFF",
+    "bgAlt":      "#F5F3F0",
+    "bgSoft":     "#F8FAFC",
+    "heading":    "#1a1a1a",
+    "body":       "#4a4a4a",
+    "muted":      "#777e8f",
+    "card":       "#FFFFFF",
+    "border":     "rgba(0,0,0,0.09)"
+  },
+  "fonts": {
+    "display": "'Bebas Neue', Impact, sans-serif",
+    "body":    "'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif"
+  },
+  "googleFonts": "https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap",
+  "gradient": "linear-gradient(135deg, #FA5000 0%, #CD2349 100%)"
+}

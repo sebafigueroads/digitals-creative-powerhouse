@@ -1,0 +1,3540 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Digitals Creative Powerhouse</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{color-scheme:dark}
+body{background:#060608;color:#e2e8f0;font-family:'Inter',sans-serif;min-height:100vh;overflow-x:hidden}
+
+/* Scrollbar */
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:#090909}
+::-webkit-scrollbar-thumb{background:#2a2a35;border-radius:4px}
+
+/* Gradient tokens */
+.grad{background:linear-gradient(135deg,#f97316 0%,#ec4899 100%)}
+.grad-text{background:linear-gradient(135deg,#f97316,#ec4899);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.grad-border{border:1px solid transparent;background-clip:padding-box;position:relative}
+.grad-border::before{content:'';position:absolute;inset:-1px;border-radius:inherit;background:linear-gradient(135deg,#f97316,#ec4899);z-index:-1}
+
+/* Cards */
+.card{background:#0d0d12;border:1px solid #1c1c22;border-radius:16px}
+.card-sm{background:#0a0a0e;border:1px solid #161618;border-radius:12px}
+
+/* Tab bar */
+.tab-btn{padding:8px 18px;border-radius:8px;font-size:13px;font-weight:600;color:#484850;cursor:pointer;transition:all .2s;border:none;background:transparent;font-family:inherit}
+.tab-btn.active{background:#1c1c22;color:#f8fafc}
+.tab-btn:hover:not(.active){color:#7a8fa6}
+
+/* Inputs */
+.input{background:#0a0a0e;border:1px solid #1c1c22;border-radius:10px;color:#e2e8f0;padding:11px 14px;font-size:14px;width:100%;outline:none;font-family:inherit;transition:border .2s}
+.input:focus{border-color:#f97316;box-shadow:0 0 0 3px rgba(249,115,22,.1)}
+.input::placeholder{color:#323238}
+select.input option{background:#0d0d12}
+textarea.input{resize:vertical;line-height:1.6}
+
+/* Buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:10px 20px;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;border:none;transition:all .2s;font-family:inherit}
+.btn-primary{background:linear-gradient(135deg,#f97316,#ec4899);color:#fff;box-shadow:0 4px 24px rgba(249,115,22,.3)}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 6px 30px rgba(249,115,22,.5)}
+.btn-primary:active{transform:translateY(0)}
+.btn-secondary{background:#1c1c22;color:#94a3b8;border:1px solid #202028}
+.btn-secondary:hover{background:#1c1c24;color:#e2e8f0}
+.btn-ghost{background:transparent;color:#64748b;border:1px solid #1e1e26}
+.btn-ghost:hover{border-color:#f97316;color:#f97316}
+.btn-sm{padding:7px 14px;font-size:13px;border-radius:8px}
+.btn-xs{padding:5px 10px;font-size:12px;border-radius:7px}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none!important;box-shadow:none!important}
+
+/* Pills / chips */
+.pill{display:inline-flex;align-items:center;gap:4px;padding:6px 14px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid #1e1e26;background:transparent;color:#484850;transition:all .15s;font-family:inherit;white-space:nowrap}
+.pill.active{background:linear-gradient(135deg,#f97316,#ec4899);color:#fff;border-color:transparent;box-shadow:0 2px 12px rgba(249,115,22,.3)}
+.pill:hover:not(.active){border-color:#f97316;color:#f97316}
+
+/* Progress */
+.progress-bar{height:6px;background:#090909;border-radius:10px;overflow:hidden}
+.progress-fill{height:100%;background:linear-gradient(90deg,#f97316,#ec4899);border-radius:10px;transition:width .6s cubic-bezier(.4,0,.2,1);width:0%}
+
+/* Format cards */
+.format-card{flex:1;background:#0a0a0e;border:2px solid #1c1c22;border-radius:12px;padding:14px 10px;display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;transition:all .2s;min-width:0}
+.format-card:hover{border-color:#f9731666}
+.format-card.active{border-color:#f97316;background:rgba(249,115,22,.06);box-shadow:0 0 20px rgba(249,115,22,.12)}
+.format-preview{border-radius:4px;background:linear-gradient(135deg,#f97316,#ec4899);opacity:.7}
+.format-card.active .format-preview{opacity:1}
+.format-label{font-size:11px;font-weight:700;color:#484850;text-align:center;line-height:1.3}
+.format-card.active .format-label{color:#f97316}
+
+/* Audio mode */
+.audio-btn{flex:1;padding:9px 8px;border-radius:9px;border:1px solid #1c1c22;background:transparent;color:#484850;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;font-family:inherit;text-align:center}
+.audio-btn.active{background:rgba(249,115,22,.1);border-color:#f97316;color:#f97316}
+.audio-btn:hover:not(.active){border-color:#f9731640;color:#64748b}
+
+/* Scene cards (storyboard) */
+.scene-card{background:#0a0a0e;border:1px solid #1c1c22;border-radius:12px;padding:14px;display:flex;align-items:flex-start;gap:12px;transition:border-color .2s}
+.scene-card:hover{border-color:#f9731640}
+.scene-icon{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.scene-type-badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
+
+/* Step indicator */
+.step-dot{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;transition:all .3s;flex-shrink:0}
+.step-dot.active{background:linear-gradient(135deg,#f97316,#ec4899);color:#fff;box-shadow:0 0 16px rgba(249,115,22,.4)}
+.step-dot.done{background:rgba(34,197,94,.15);color:#22c55e;border:1px solid rgba(34,197,94,.3)}
+.step-dot.pending{background:#090909;color:#323238;border:1px solid #1c1c22}
+.step-line{flex:1;height:1px;background:#1c1c22;margin:0 8px}
+.step-line.done{background:linear-gradient(90deg,#f97316,#ec4899);opacity:.4}
+
+/* Video card in library */
+.video-card{background:#0d0d12;border:1px solid #1c1c22;border-radius:14px;overflow:hidden;transition:transform .2s,border-color .2s}
+.video-card:hover{transform:translateY(-2px);border-color:#f9731640}
+.video-thumb{width:100%;aspect-ratio:9/16;background:#060608;position:relative;overflow:hidden}
+.video-thumb.landscape{aspect-ratio:16/9}
+.video-thumb.square{aspect-ratio:1}
+
+/* Modal */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.8);display:flex;align-items:center;justify-content:center;z-index:200;backdrop-filter:blur(6px)}
+.modal{background:#0d0d12;border:1px solid #1e1e26;border-radius:18px;padding:28px;width:520px;max-width:96vw;max-height:90vh;overflow-y:auto}
+
+/* Transition grid */
+.trans-btn{padding:8px 12px;border-radius:9px;border:1px solid #1c1c22;background:transparent;color:#484850;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;font-family:inherit;display:flex;flex-direction:column;align-items:center;gap:3px}
+.trans-btn.active{border-color:#f97316;color:#f97316;background:rgba(249,115,22,.08)}
+.trans-btn:hover:not(.active){border-color:#f9731640;color:#64748b}
+.trans-icon{font-size:18px}
+
+/* Tooltip */
+.tooltip{position:relative}
+.tooltip-text{display:none;position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:#1e1e26;color:#cbd5e1;font-size:11px;padding:4px 8px;border-radius:6px;white-space:nowrap;pointer-events:none;z-index:10}
+.tooltip:hover .tooltip-text{display:block}
+
+/* Chat messages */
+.chat-msg{padding:10px 14px;border-radius:10px;font-size:13px;line-height:1.6;max-width:92%}
+.chat-user{background:#1c1c22;color:#cbd5e1;margin-left:auto}
+.chat-ai{background:rgba(249,115,22,.08);border:1px solid rgba(249,115,22,.15);color:#fed7aa}
+
+/* Glow effects */
+.glow-orange{box-shadow:0 0 30px rgba(249,115,22,.15)}
+.glow-pink{box-shadow:0 0 30px rgba(236,72,153,.1)}
+
+/* Range slider */
+input[type=range]{-webkit-appearance:none;width:100%;height:4px;border-radius:4px;outline:none;cursor:pointer}
+input[type=range]::-webkit-slider-track{background:#1c1c22;height:4px;border-radius:4px}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:linear-gradient(135deg,#f97316,#ec4899);cursor:pointer;box-shadow:0 0 8px rgba(249,115,22,.5);border:2px solid #fff}
+
+/* Dropzone */
+.dropzone{border:2px dashed #1e1e26;border-radius:12px;padding:28px;text-align:center;cursor:pointer;transition:all .2s}
+.dropzone:hover,.dropzone.dragover{border-color:#f97316;background:rgba(249,115,22,.04)}
+
+/* Animate */
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+@keyframes fadeInUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+@keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+.spin{animation:spin 1s linear infinite}
+.pulse{animation:pulse 1.5s ease-in-out infinite}
+.fade-in{animation:fadeInUp .3s ease}
+.shimmer{background:linear-gradient(90deg,#0e1827 25%,#1c1c22 50%,#0e1827 75%);background-size:200% 100%;animation:shimmer 1.5s infinite}
+
+/* Separator */
+.sep{border:none;border-top:1px solid #1c1c22;margin:20px 0}
+
+/* Color input */
+.color-row{display:flex;align-items:center;gap:8px}
+.color-row input[type=color]{width:34px;height:34px;border:none;background:none;cursor:pointer;border-radius:7px;padding:2px}
+.color-row input[type=text]{flex:1}
+
+label{font-size:12px;font-weight:600;color:#64748b;margin-bottom:5px;display:block;text-transform:uppercase;letter-spacing:.5px}
+
+/* Notification */
+.notif{position:fixed;top:20px;right:20px;background:#0d0d12;border:1px solid #1e1e26;border-radius:12px;padding:12px 18px;font-size:13px;z-index:500;max-width:340px;box-shadow:0 8px 32px rgba(0,0,0,.4);animation:fadeInUp .3s ease}
+.notif.success{border-color:rgba(34,197,94,.3);color:#4ade80}
+.notif.error{border-color:rgba(239,68,68,.3);color:#f87171}
+.notif.info{border-color:rgba(249,115,22,.3);color:#fb923c}
+
+/* Logo circle preview */
+.logo-preview{width:48px;height:48px;border-radius:10px;object-fit:contain;background:#060608;padding:4px;border:1px solid #1c1c22}
+
+/* AI vibe tag */
+.vibe-tag{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:12px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px}
+
+/* Misc */
+video{border-radius:10px;background:#000}
+.truncate{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hidden{display:none!important}
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════════ HEADER -->
+<header id="app-header" style="background:#060607;border-bottom:1px solid #1c1c22;padding:0 24px;height:58px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;backdrop-filter:blur(10px)">
+  <div style="display:flex;align-items:center;gap:10px">
+    <div style="width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,#f97316,#ec4899);display:flex;align-items:center;justify-content:center;font-size:15px">🎬</div>
+    <div>
+      <div style="font-size:15px;font-weight:800" class="grad-text">Digitals Creative Powerhouse</div>
+      <div style="font-size:10px;color:#323238;margin-top:-1px">AI Video Studio v2</div>
+    </div>
+  </div>
+  <nav style="display:flex;gap:4px;background:#0a0a0e;padding:4px;border-radius:10px;border:1px solid #1c1c22">
+    <button class="tab-btn active" onclick="showTab('create')" id="tab-create">✨ Crear</button>
+    <button class="tab-btn" onclick="showTab('graphics')" id="tab-graphics">🎨 Gráficas</button>
+    <button class="tab-btn" onclick="showTab('clicktoad')" id="tab-clicktoad" style="background:linear-gradient(135deg,#f97316,#ec4899);color:#fff;font-weight:800">⚡ Click to Ad</button>
+    <button class="tab-btn" onclick="showTab('library')" id="tab-library">📁 Librería</button>
+    <button class="tab-btn" onclick="showTab('clients')" id="tab-clients">🎯 Clientes</button>
+  </nav>
+  <div style="display:flex;align-items:center;gap:8px">
+    <div id="api-key-indicator" style="display:flex;align-items:center;gap:5px;font-size:11px;color:#323238;cursor:pointer" onclick="openApiKeyModal()">
+      <span id="api-key-dot" style="width:7px;height:7px;border-radius:50%;background:#323238"></span>
+      <span id="api-key-label">ElevenLabs</span>
+    </div>
+    <button class="btn btn-sm btn-ghost" onclick="openApiKeyModal()" title="ElevenLabs Key">🔑</button>
+    <button class="btn btn-sm btn-ghost" onclick="openAiKeysModal()" title="AI Integrations" style="font-size:13px">⚙️ IA</button>
+  </div>
+</header>
+
+<!-- ══════════════════════════════════════════════════ MAIN -->
+<main style="max-width:1400px;margin:0 auto;padding:24px 20px;display:grid;grid-template-columns:1fr 360px;gap:20px;align-items:start">
+
+<!-- ════════════════════ LEFT: TABS ════════════════════ -->
+<div>
+
+<!-- ══ TAB: CREATE ══ -->
+<section id="tab-create-content">
+
+  <!-- Step indicator -->
+  <div style="display:flex;align-items:center;margin-bottom:24px" id="step-indicator">
+    <div class="step-dot active" id="dot-1">1</div>
+    <div style="font-size:12px;font-weight:700;color:#f97316;margin:0 6px;white-space:nowrap">Idea</div>
+    <div class="step-line" id="line-12"></div>
+    <div class="step-dot pending" id="dot-2">2</div>
+    <div style="font-size:12px;font-weight:600;color:#323238;margin:0 6px;white-space:nowrap" id="label-2">Guion</div>
+    <div class="step-line" id="line-23"></div>
+    <div class="step-dot pending" id="dot-3">3</div>
+    <div style="font-size:12px;font-weight:600;color:#323238;margin:0 6px;white-space:nowrap" id="label-3">Producción</div>
+  </div>
+
+  <!-- ── STEP 1: IDEA ────────────────────────────────── -->
+  <div id="step1" class="fade-in">
+
+    <!-- Prompt -->
+    <div class="card" style="padding:20px;margin-bottom:16px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <label style="margin:0">💡 Describe tu video</label>
+        <span style="font-size:11px;color:#323238" id="prompt-counter">0 / 500</span>
+      </div>
+      <textarea class="input" id="prompt-input" rows="4" maxlength="500"
+        placeholder="Ej: App de delivery para restaurantes en LATAM. Quiero mostrar el flujo del pedido, los pagos integrados y el panel de analytics. Tono urgente, para TikTok."
+        oninput="updatePromptCounter()"></textarea>
+    </div>
+
+    <!-- Brand selector + URL scraper -->
+    <div class="card" style="padding:20px;margin-bottom:16px">
+      <label>🎯 Marca del cliente</label>
+      <div style="display:grid;grid-template-columns:1fr auto;gap:10px;margin-bottom:12px">
+        <select class="input" id="client-select" onchange="onClientSelect()">
+          <option value="">— Selecciona cliente existente —</option>
+        </select>
+        <button class="btn btn-sm btn-secondary" onclick="openNewClientModal()">+ Nuevo</button>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+        <div style="flex:1;height:1px;background:#1c1c22"></div>
+        <span style="font-size:11px;color:#323238">o ingresa URL</span>
+        <div style="flex:1;height:1px;background:#1c1c22"></div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <input class="input" id="brand-url" type="url" placeholder="https://micliente.com" style="flex:1"/>
+        <button class="btn btn-sm btn-secondary" onclick="scrapeBrand()" id="scrape-btn">🔍 Scrapear</button>
+      </div>
+      <!-- Scraped brand preview -->
+      <div id="brand-preview" class="hidden" style="margin-top:12px;padding:12px;background:#060608;border-radius:10px;border:1px solid #1c1c22;display:flex;align-items:center;gap:12px">
+        <div id="brand-color-dot" style="width:36px;height:36px;border-radius:8px;flex-shrink:0"></div>
+        <div style="flex:1;min-width:0">
+          <div id="brand-preview-name" style="font-size:14px;font-weight:700;color:#e2e8f0"></div>
+          <div id="brand-preview-url" style="font-size:11px;color:#484850;margin-top:2px" class="truncate"></div>
+        </div>
+        <div id="brand-preview-colors" style="display:flex;gap:4px"></div>
+      </div>
+    </div>
+
+    <!-- Format + Duration row -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+      <!-- Format -->
+      <div class="card" style="padding:18px">
+        <label>📐 Formato</label>
+        <div style="display:flex;gap:8px">
+          <div class="format-card active" data-format="9:16" onclick="setFormat('9:16')">
+            <div class="format-preview" style="width:22px;height:39px"></div>
+            <div class="format-label">9:16<br>TikTok/Reels</div>
+          </div>
+          <div class="format-card" data-format="16:9" onclick="setFormat('16:9')">
+            <div class="format-preview" style="width:39px;height:22px"></div>
+            <div class="format-label">16:9<br>YouTube</div>
+          </div>
+          <div class="format-card" data-format="1:1" onclick="setFormat('1:1')">
+            <div class="format-preview" style="width:30px;height:30px"></div>
+            <div class="format-label">1:1<br>Feed</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Duration -->
+      <div class="card" style="padding:18px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+          <label style="margin:0">⏱ Duración</label>
+          <span style="font-size:20px;font-weight:800" class="grad-text" id="duration-display">21s</span>
+        </div>
+        <input type="range" id="duration-slider" min="15" max="60" step="5" value="21" oninput="updateDuration()"/>
+        <div style="display:flex;justify-content:space-between;margin-top:6px">
+          <span style="font-size:10px;color:#323238">15s</span>
+          <span style="font-size:10px;color:#323238">30s</span>
+          <span style="font-size:10px;color:#323238">45s</span>
+          <span style="font-size:10px;color:#323238">60s</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Audio mode + Tone + RRSS -->
+    <div class="card" style="padding:18px;margin-bottom:16px">
+      <!-- Audio mode -->
+      <div style="margin-bottom:16px">
+        <label>🔊 Modo de audio</label>
+        <div style="display:flex;gap:8px">
+          <button class="audio-btn active" data-mode="both" onclick="setAudioMode('both')">🎙 Narración + Música</button>
+          <button class="audio-btn" data-mode="narration" onclick="setAudioMode('narration')">🎙 Solo Narración</button>
+          <button class="audio-btn" data-mode="music" onclick="setAudioMode('music')">🎵 Solo Música</button>
+        </div>
+      </div>
+
+      <!-- Tone -->
+      <div style="margin-bottom:14px">
+        <label>🎭 Tono y estilo</label>
+        <div style="display:flex;flex-wrap:wrap;gap:6px">
+          <button class="pill" data-group="tone" data-value="Urgente" onclick="setPill(this,'tone')">🔥 Urgente</button>
+          <button class="pill active" data-group="tone" data-value="Inspirador" onclick="setPill(this,'tone')">✨ Inspirador</button>
+          <button class="pill" data-group="tone" data-value="Profesional" onclick="setPill(this,'tone')">💼 Profesional</button>
+          <button class="pill" data-group="tone" data-value="Divertido" onclick="setPill(this,'tone')">😄 Divertido</button>
+          <button class="pill" data-group="tone" data-value="Dramático" onclick="setPill(this,'tone')">🎬 Dramático</button>
+        </div>
+      </div>
+
+      <!-- RRSS -->
+      <div style="margin-bottom:14px">
+        <label>📱 Red social objetivo</label>
+        <div style="display:flex;flex-wrap:wrap;gap:6px">
+          <button class="pill active" data-group="rrss" data-value="TikTok" onclick="setPill(this,'rrss')">🎵 TikTok</button>
+          <button class="pill" data-group="rrss" data-value="Instagram" onclick="setPill(this,'rrss')">📸 Instagram</button>
+          <button class="pill" data-group="rrss" data-value="Reels" onclick="setPill(this,'rrss')">🎬 Reels</button>
+          <button class="pill" data-group="rrss" data-value="YouTube" onclick="setPill(this,'rrss')">▶️ YouTube</button>
+          <button class="pill" data-group="rrss" data-value="LinkedIn" onclick="setPill(this,'rrss')">💼 LinkedIn</button>
+          <button class="pill" data-group="rrss" data-value="Ads" onclick="setPill(this,'rrss')">📢 Ads</button>
+        </div>
+      </div>
+
+      <!-- Music mood -->
+      <div>
+        <label>🎶 Mood musical</label>
+        <div style="display:flex;flex-wrap:wrap;gap:6px">
+          <button class="pill" data-group="mood" data-value="Corporate" onclick="setPill(this,'mood')">🏢 Corporate</button>
+          <button class="pill" data-group="mood" data-value="Hype" onclick="setPill(this,'mood')">⚡ Hype</button>
+          <button class="pill active" data-group="mood" data-value="Cinematic" onclick="setPill(this,'mood')">🎥 Cinematic</button>
+          <button class="pill" data-group="mood" data-value="Chill" onclick="setPill(this,'mood')">🌊 Chill</button>
+          <button class="pill" data-group="mood" data-value="Dramatic" onclick="setPill(this,'mood')">🔥 Dramatic</button>
+          <button class="pill" data-group="mood" data-value="Upbeat" onclick="setPill(this,'mood')">🎉 Upbeat</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- SFX toggle + Transition -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px">
+      <div class="card" style="padding:16px;display:flex;align-items:center;gap:10px">
+        <div style="font-size:22px">🎯</div>
+        <div>
+          <div style="font-size:13px;font-weight:700;color:#22c55e">Auto-Branding ON</div>
+          <div style="font-size:10px;color:#484850;margin-top:2px">SFX impacto + Logo animado al final</div>
+        </div>
+        <input type="hidden" id="sfx-toggle" value="true">
+      </div>
+      <div class="card" style="padding:16px">
+        <label>🎞 Transición</label>
+        <select class="input" id="transition-select" style="padding:6px 10px;font-size:12px">
+          <option value="fade">🌅 Fade</option>
+          <option value="zoom-in" selected>🔍 Zoom In</option>
+          <option value="zoom-out">🔭 Zoom Out</option>
+          <option value="slide-left">⬅️ Slide Left</option>
+          <option value="slide-right">➡️ Slide Right</option>
+          <option value="slide-up">⬆️ Slide Up</option>
+          <option value="blur">🌀 Blur</option>
+          <option value="glitch">⚡ Glitch</option>
+          <option value="wipe">✂️ Wipe</option>
+          <option value="bounce">🎯 Bounce</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Image style -->
+    <div class="card" style="padding:16px;margin-bottom:16px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <label style="margin:0">🎨 Estilo visual de imágenes IA</label>
+        <div style="font-size:10px;color:#22c55e;font-weight:700">OpenAI · Stability · Fal · Replicate · Pexels</div>
+      </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        <button class="pill active" data-group="imgstyle" data-value="photorealistic" onclick="setPill(this,'imgstyle')">📷 Fotorrealista</button>
+        <button class="pill" data-group="imgstyle" data-value="cinematic" onclick="setPill(this,'imgstyle')">🎬 Cinemático</button>
+        <button class="pill" data-group="imgstyle" data-value="corporate" onclick="setPill(this,'imgstyle')">💼 Corporativo</button>
+        <button class="pill" data-group="imgstyle" data-value="illustration" onclick="setPill(this,'imgstyle')">🎨 Ilustración</button>
+        <button class="pill" data-group="imgstyle" data-value="abstract" onclick="setPill(this,'imgstyle')">🌀 Abstracto</button>
+      </div>
+    </div>
+
+    <!-- Creativity slider -->
+    <div class="card" style="padding:16px;margin-bottom:16px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <label style="margin:0">🎨 Creatividad del Guionista</label>
+        <span id="creativity-val" style="font-size:13px;font-weight:800;color:#f97316">50 — Equilibrado</span>
+      </div>
+      <input type="range" id="creativity-slider" min="0" max="100" value="50"
+        oninput="updateCreativity(this.value)"
+        style="width:100%;accent-color:#f97316;cursor:pointer;height:6px">
+      <div style="display:flex;justify-content:space-between;font-size:10px;color:#484850;margin-top:6px">
+        <span>🏢 Conservador</span><span>⚖️ Equilibrado</span><span>🔥 Salvaje</span>
+      </div>
+    </div>
+
+    <!-- Generate button -->
+    <button class="btn btn-primary" style="width:100%;padding:16px;font-size:16px" onclick="generateScript()" id="gen-btn">
+      ✨ Generar Guion + Storyboard
+    </button>
+  </div>
+
+  <!-- ── STEP 2: SCRIPT + STORYBOARD ─────────────────── -->
+  <div id="step2" class="hidden fade-in">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+
+      <!-- Script editor -->
+      <div class="card" style="padding:18px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+          <label style="margin:0">🎙 Guion de voz en off</label>
+          <span id="word-count" style="font-size:11px;color:#484850"></span>
+        </div>
+        <textarea class="input" id="script-editor" rows="10" oninput="updateWordCount();scheduleVoicePreview()" placeholder="Guion generado aquí..."></textarea>
+        <div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+          <button class="btn btn-xs btn-ghost" onclick="regenerateScript()">🔄 Regenerar</button>
+          <button class="btn btn-xs btn-ghost" onclick="shortenScript()">✂️ Acortar</button>
+          <button class="btn btn-xs btn-ghost" onclick="expandScript()">📝 Expandir</button>
+          <button class="btn btn-xs btn-ghost" id="preview-tts-btn" onclick="previewVoice()" style="margin-left:auto">🔊 Preview voz</button>
+          <span id="tts-sync-indicator" style="font-size:10px;color:#484850;display:none">⏳ sincronizando...</span>
+        </div>
+        <audio id="tts-preview-player" controls style="width:100%;margin-top:8px;display:none;height:30px"></audio>
+      </div>
+
+      <!-- Storyboard -->
+      <div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+          <label style="margin:0">🎬 Storyboard</label>
+          <div style="display:flex;align-items:center;gap:6px">
+            <span id="scene-count" style="font-size:11px;color:#484850"></span>
+            <button class="btn btn-xs btn-ghost" onclick="previewSceneImages()" id="preview-images-btn">🎨 Preview imágenes</button>
+          </div>
+        </div>
+        <div id="storyboard-cards" style="display:flex;flex-direction:column;gap:8px"></div>
+      </div>
+    </div>
+
+    <!-- AI Mode selector -->
+    <div class="card" style="padding:16px;margin-bottom:16px">
+      <label>🤖 Modo de producción</label>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+        <div class="card-sm" style="padding:12px;cursor:pointer;border:1px solid #1c1c22;transition:.2s;text-align:center" id="mode-mashup" onclick="setAiMode('mashup')">
+          <div style="font-size:20px;margin-bottom:4px">🎬</div>
+          <div style="font-size:12px;font-weight:700;color:#e2e8f0">Mashup</div>
+          <div style="font-size:10px;color:#484850;margin-top:2px">Clips reales subidos</div>
+          <!-- Mashup mode selector (shown when mashup mode is active) -->
+          <div class="mashup-mode-selector" id="mashup-mode-selector" style="margin:10px 0 0 0;display:none;gap:6px;align-items:center;flex-direction:column;">
+            <span style="font-size:10px;color:#94a3b8;font-weight:600;text-transform:uppercase;letter-spacing:.05em;">Modo Mashup</span>
+            <div style="display:flex;gap:6px;background:#0f172a;border-radius:8px;padding:3px;">
+              <button id="btn-mashup-intelligent" onclick="event.stopPropagation();setMashupMode('intelligent')"
+                style="padding:5px 12px;border-radius:6px;border:none;font-size:11px;font-weight:600;cursor:pointer;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;transition:all .2s;">
+                ⚡ Inteligente
+              </button>
+              <button id="btn-mashup-manual" onclick="event.stopPropagation();setMashupMode('manual')"
+                style="padding:5px 12px;border-radius:6px;border:none;font-size:11px;font-weight:600;cursor:pointer;background:transparent;color:#64748b;transition:all .2s;">
+                🎬 Manual
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="card-sm" style="padding:12px;cursor:pointer;border:2px solid #f97316;background:rgba(249,115,22,.05);transition:.2s;text-align:center" id="mode-template" onclick="setAiMode('template')">
+          <div style="font-size:20px;margin-bottom:4px">✨</div>
+          <div style="font-size:12px;font-weight:700;color:#f97316">Template IA</div>
+          <div style="font-size:10px;color:#484850;margin-top:2px">Composición dinámica</div>
+        </div>
+        <div class="card-sm" style="padding:12px;cursor:pointer;border:1px solid #1c1c22;opacity:.5;transition:.2s;text-align:center;position:relative" id="mode-veo">
+          <div style="font-size:20px;margin-bottom:4px">🎥</div>
+          <div style="font-size:12px;font-weight:700;color:#e2e8f0">Veo + Lyria</div>
+          <div style="font-size:10px;color:#484850;margin-top:2px">Google AI (próximamente)</div>
+          <div style="position:absolute;top:6px;right:6px;background:rgba(249,115,22,.2);color:#f97316;font-size:9px;font-weight:700;padding:1px 5px;border-radius:6px">SOON</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Action row -->
+    <div style="display:flex;gap:12px">
+      <button class="btn btn-secondary" onclick="goToStep(1)" style="flex:0 0 auto">← Editar</button>
+      <button class="btn btn-primary" style="flex:1;padding:14px;font-size:15px" onclick="startRender()" id="render-btn">
+        🚀 Confirmar y Renderizar
+      </button>
+    </div>
+  </div>
+
+  <!-- ── STEP 3: PROGRESS + RESULT ──────────────────── -->
+  <div id="step3" class="hidden fade-in">
+    <!-- Pipeline steps -->
+    <div class="card" style="padding:20px;margin-bottom:16px">
+      <div style="font-size:14px;font-weight:700;color:#e2e8f0;margin-bottom:16px">🎬 Pipeline en ejecución</div>
+      <div id="pipeline-steps" style="display:flex;flex-direction:column;gap:8px"></div>
+      <div style="margin-top:16px">
+        <div style="display:flex;justify-content:space-between;font-size:12px;color:#484850;margin-bottom:6px">
+          <span id="progress-label">Iniciando...</span>
+          <span id="progress-pct">0%</span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill" id="progress-fill"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Result (hidden until done) -->
+    <div id="render-result" class="hidden card" style="padding:20px">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px">
+        <span style="font-size:24px">🎉</span>
+        <div>
+          <div style="font-size:16px;font-weight:800;color:#e2e8f0">¡Video listo!</div>
+          <div style="font-size:12px;color:#484850" id="result-meta"></div>
+        </div>
+      </div>
+      <video id="result-video" controls style="width:100%;max-height:500px;border-radius:12px;background:#000;margin-bottom:16px"></video>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
+        <a id="download-btn" class="btn btn-primary" style="text-decoration:none;justify-content:center" download>⬇ Descargar MP4</a>
+        <button class="btn btn-secondary" onclick="goToStep(1)">🔄 Crear otro</button>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
+        <button class="btn btn-xs btn-ghost" onclick="shareVideo('slack')">📣 Slack</button>
+        <button class="btn btn-xs btn-ghost" onclick="shareVideo('whatsapp')">💬 WhatsApp</button>
+        <button class="btn btn-xs btn-ghost" onclick="shareVideo('drive')">📁 Drive</button>
+      </div>
+    </div>
+
+    <!-- Error state -->
+    <div id="render-error" class="hidden card" style="padding:20px;border-color:rgba(239,68,68,.3)">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+        <span style="font-size:20px">❌</span>
+        <div style="font-size:15px;font-weight:700;color:#f87171">Error en el render</div>
+      </div>
+      <div id="error-message" style="font-size:13px;color:#94a3b8;margin-bottom:16px"></div>
+      <button class="btn btn-secondary btn-sm" onclick="goToStep(1)">← Volver y reintentar</button>
+    </div>
+  </div>
+
+</section>
+
+<!-- ══ TAB: GRÁFICAS ══ -->
+<section id="tab-graphics-content" class="hidden fade-in">
+  <div style="margin-bottom:24px">
+    <h2 style="font-size:20px;font-weight:800;color:#e2e8f0;margin-bottom:4px">🎨 Generador de Gráficas</h2>
+    <div style="font-size:12px;color:#484850">Posts, Stories, Banners, Carruseles — con tu branding automático</div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 380px;gap:20px;align-items:start">
+
+    <!-- LEFT: Config -->
+    <div>
+      <!-- Client selector -->
+      <div class="card" style="padding:16px;margin-bottom:16px">
+        <label>🎯 Cliente / Marca</label>
+        <select class="input" id="graphic-client-select" onchange="onGraphicClientChange(this.value)" style="font-size:13px">
+          <option value="">— Selecciona cliente —</option>
+        </select>
+      </div>
+
+      <!-- Graphic type -->
+      <div class="card" style="padding:16px;margin-bottom:16px">
+        <label style="margin-bottom:10px">📐 Tipo de gráfica</label>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px" id="graphic-type-grid">
+          <div class="trans-btn active" data-gtype="post" onclick="setGraphicType('post',this)" style="padding:10px 6px">
+            <span class="trans-icon">📱</span><span style="font-size:10px">Post 1:1</span>
+          </div>
+          <div class="trans-btn" data-gtype="story" onclick="setGraphicType('story',this)" style="padding:10px 6px">
+            <span class="trans-icon">📲</span><span style="font-size:10px">Story</span>
+          </div>
+          <div class="trans-btn" data-gtype="banner" onclick="setGraphicType('banner',this)" style="padding:10px 6px">
+            <span class="trans-icon">🖥</span><span style="font-size:10px">Banner</span>
+          </div>
+          <div class="trans-btn" data-gtype="quote" onclick="setGraphicType('quote',this)" style="padding:10px 6px">
+            <span class="trans-icon">💬</span><span style="font-size:10px">Quote</span>
+          </div>
+          <div class="trans-btn" data-gtype="stats" onclick="setGraphicType('stats',this)" style="padding:10px 6px">
+            <span class="trans-icon">📊</span><span style="font-size:10px">Stats</span>
+          </div>
+          <div class="trans-btn" data-gtype="product" onclick="setGraphicType('product',this)" style="padding:10px 6px">
+            <span class="trans-icon">🛍</span><span style="font-size:10px">Producto</span>
+          </div>
+          <div class="trans-btn" data-gtype="carousel" onclick="setGraphicType('carousel',this)" style="padding:10px 6px">
+            <span class="trans-icon">🎠</span><span style="font-size:10px">Carrusel</span>
+          </div>
+          <div class="trans-btn" data-gtype="product" onclick="setGraphicType('product',this)" style="padding:10px 6px;opacity:.5">
+            <span class="trans-icon">+</span><span style="font-size:10px">Más soon</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Background style -->
+      <div class="card" style="padding:16px;margin-bottom:16px">
+        <label style="margin-bottom:8px">🌈 Fondo</label>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="pill active" data-group="gbg" data-value="dark" onclick="setPill(this,'gbg')">🌑 Dark</button>
+          <button class="pill" data-group="gbg" data-value="gradient" onclick="setPill(this,'gbg')">🌈 Gradient</button>
+          <button class="pill" data-group="gbg" data-value="mesh" onclick="setPill(this,'gbg')">✨ Mesh</button>
+          <button class="pill" data-group="gbg" data-value="light" onclick="setPill(this,'gbg')">☀️ Light</button>
+          <button class="pill" data-group="gbg" data-value="solid" onclick="setPill(this,'gbg')">⬛ Solid</button>
+          <button class="pill" data-group="gbg" data-value="image" onclick="setPill(this,'gbg')">🖼 Imagen</button>
+        </div>
+      </div>
+
+      <!-- Content -->
+      <div class="card" style="padding:16px;margin-bottom:16px">
+        <label>✍️ Contenido</label>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div>
+            <div style="font-size:10px;color:#484850;margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px">Titular principal *</div>
+            <input class="input" id="graphic-headline" placeholder="Ej: Agua 100% pura para tu familia" style="font-size:14px" oninput="autoGraphicPreview()"/>
+          </div>
+          <div>
+            <div style="font-size:10px;color:#484850;margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px">Subtítulo</div>
+            <input class="input" id="graphic-sub" placeholder="Certificada por la OMS" style="font-size:13px" oninput="autoGraphicPreview()"/>
+          </div>
+          <div id="graphic-body-row">
+            <div style="font-size:10px;color:#484850;margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px">Texto cuerpo</div>
+            <textarea class="input" id="graphic-body" rows="2" placeholder="Texto adicional opcional..." style="font-size:13px" oninput="autoGraphicPreview()"></textarea>
+          </div>
+          <div>
+            <div style="font-size:10px;color:#484850;margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px">Call to Action</div>
+            <input class="input" id="graphic-cta" placeholder="Ej: Comprar ahora →" style="font-size:13px"/>
+          </div>
+          <!-- Stats (shown when type=stats) -->
+          <div id="graphic-stats-row" class="hidden">
+            <div style="font-size:10px;color:#484850;margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px">Stats (máx 3)</div>
+            <div style="display:flex;flex-direction:column;gap:6px" id="graphic-stats-inputs">
+              <div style="display:flex;gap:6px"><input class="input" placeholder="Icono" style="width:50px;font-size:13px" id="stat0-icon" value="💧"/><input class="input" placeholder="Valor" style="width:80px;font-size:13px" id="stat0-val" value="99.9%"/><input class="input" placeholder="Etiqueta" style="font-size:13px;flex:1" id="stat0-label" value="Pureza"/></div>
+              <div style="display:flex;gap:6px"><input class="input" placeholder="Icono" style="width:50px;font-size:13px" id="stat1-icon" value="🏆"/><input class="input" placeholder="Valor" style="width:80px;font-size:13px" id="stat1-val" value="#1"/><input class="input" placeholder="Etiqueta" style="font-size:13px;flex:1" id="stat1-label" value="Recomendada"/></div>
+              <div style="display:flex;gap:6px"><input class="input" placeholder="Icono" style="width:50px;font-size:13px" id="stat2-icon" value="⭐"/><input class="input" placeholder="Valor" style="width:80px;font-size:13px" id="stat2-val" value="4.9"/><input class="input" placeholder="Etiqueta" style="font-size:13px;flex:1" id="stat2-label" value="Rating"/></div>
+            </div>
+          </div>
+          <!-- Quote author (shown when type=quote) -->
+          <div id="graphic-quote-row" class="hidden">
+            <div style="font-size:10px;color:#484850;margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px">Autor de la cita</div>
+            <input class="input" id="graphic-author" placeholder="Ej: Juan García, CEO" style="font-size:13px"/>
+          </div>
+          <!-- Image URL (shown when bgStyle=image or type=product/banner) -->
+          <div id="graphic-image-row">
+            <div style="font-size:10px;color:#484850;margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px">URL de imagen (opcional)</div>
+            <input class="input" id="graphic-imageurl" placeholder="https://..." style="font-size:12px"/>
+          </div>
+        </div>
+      </div>
+
+      <!-- Carousel slides (shown when type=carousel) -->
+      <div id="graphic-carousel-section" class="hidden card" style="padding:16px;margin-bottom:16px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+          <label style="margin:0">🎠 Slides del carrusel</label>
+          <button class="btn btn-xs btn-ghost" onclick="addCarouselSlide()">+ Agregar slide</button>
+        </div>
+        <div id="carousel-slides-list" style="display:flex;flex-direction:column;gap:8px"></div>
+      </div>
+
+      <!-- Mass generation -->
+      <div class="card" style="padding:12px;margin-bottom:12px;background:#0a0a0e">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+          <label style="margin:0;font-size:12px">📦 Set masivo</label>
+          <span style="font-size:10px;color:#484850">hasta 10 piezas distintas</span>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:4px;margin-bottom:8px" id="mass-type-selector">
+          <label style="display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;padding:5px;border-radius:6px;border:1px solid #1c1c22;background:transparent;font-size:9px;color:#484850">
+            <input type="checkbox" value="post" data-mass style="accent-color:#f97316" checked/> Post 1:1
+          </label>
+          <label style="display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;padding:5px;border-radius:6px;border:1px solid #1c1c22;background:transparent;font-size:9px;color:#484850">
+            <input type="checkbox" value="story" data-mass style="accent-color:#f97316"/> Story
+          </label>
+          <label style="display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;padding:5px;border-radius:6px;border:1px solid #1c1c22;background:transparent;font-size:9px;color:#484850">
+            <input type="checkbox" value="banner" data-mass style="accent-color:#f97316"/> Banner
+          </label>
+          <label style="display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;padding:5px;border-radius:6px;border:1px solid #1c1c22;background:transparent;font-size:9px;color:#484850">
+            <input type="checkbox" value="quote" data-mass style="accent-color:#f97316"/> Quote
+          </label>
+          <label style="display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;padding:5px;border-radius:6px;border:1px solid #1c1c22;background:transparent;font-size:9px;color:#484850">
+            <input type="checkbox" value="stats" data-mass style="accent-color:#f97316"/> Stats
+          </label>
+        </div>
+        <button class="btn btn-ghost" style="width:100%;font-size:12px" id="mass-gen-btn" onclick="generateMassGraphics()">
+          📦 Generar set completo
+        </button>
+      </div>
+
+      <!-- Generate buttons -->
+      <div style="display:flex;gap:10px">
+        <button class="btn btn-primary" style="flex:1;padding:14px" id="graphic-gen-btn" onclick="generateGraphic()">
+          🎨 Generar Gráfica
+        </button>
+        <button class="btn btn-secondary" onclick="generateGraphicAnimated()" title="Generar como MP4 animado">
+          🎬 Animar
+        </button>
+      </div>
+
+      <!-- Content Grid Generator -->
+      <div class="card" style="padding:16px;margin-top:16px;border:1px solid #f9731633">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+          <label style="margin:0;font-size:13px;font-weight:700">🧠 Content Grid (Gemini Director)</label>
+          <span style="font-size:10px;color:#484850">Gemini diseña cada pieza única</span>
+        </div>
+        <!-- Qty inputs -->
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px">
+          <div>
+            <div style="font-size:10px;color:#484850;margin-bottom:4px">Posts 1:1</div>
+            <input type="number" class="input" id="grid-posts" min="0" max="10" value="3" style="font-size:13px;padding:6px 10px"/>
+          </div>
+          <div>
+            <div style="font-size:10px;color:#484850;margin-bottom:4px">Stories 9:16</div>
+            <input type="number" class="input" id="grid-stories" min="0" max="10" value="2" style="font-size:13px;padding:6px 10px"/>
+          </div>
+          <div>
+            <div style="font-size:10px;color:#484850;margin-bottom:4px">Banners 16:9</div>
+            <input type="number" class="input" id="grid-banners" min="0" max="5" value="0" style="font-size:13px;padding:6px 10px"/>
+          </div>
+        </div>
+        <div style="margin-bottom:10px">
+          <div style="font-size:10px;color:#484850;margin-bottom:4px">Contexto de campaña (opcional)</div>
+          <input class="input" id="grid-context" placeholder="Ej: lanzamiento del producto X, oferta del 30%, Black Friday..." style="font-size:12px"/>
+        </div>
+        <button class="btn btn-primary" style="width:100%;font-size:13px" id="grid-gen-btn" onclick="generateContentGrid()">
+          🧠 Generar Content Grid con Gemini
+        </button>
+        <!-- Results -->
+        <div id="grid-results" style="margin-top:12px"></div>
+      </div>
+    </div>
+
+    <!-- RIGHT: Preview + Results -->
+    <div>
+      <div class="card" style="padding:16px;margin-bottom:16px;position:sticky;top:80px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+          <label style="margin:0">👁 Preview</label>
+          <span id="graphic-size-label" style="font-size:10px;color:#484850">1080 × 1080</span>
+        </div>
+
+        <!-- Preview container — aspect ratio changes by type -->
+        <div id="graphic-preview-wrap" style="position:relative;background:#060608;border-radius:12px;overflow:hidden;border:1px solid #1c1c22;aspect-ratio:1/1;display:flex;align-items:center;justify-content:center">
+          <div id="graphic-preview-img-wrap" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center">
+            <div style="text-align:center;color:#323238">
+              <div style="font-size:32px;margin-bottom:8px">🎨</div>
+              <div style="font-size:12px">Configura y genera tu gráfica</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Results grid -->
+        <div id="graphic-results" style="margin-top:12px;display:flex;flex-direction:column;gap:8px"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ TAB: CLICK TO AD ══ -->
+<section id="tab-clicktoad-content" class="hidden fade-in">
+  <div style="margin-bottom:24px">
+    <h2 style="font-size:22px;font-weight:900;margin-bottom:4px"><span class="grad-text">⚡ Click to Ad</span></h2>
+    <div style="font-size:12px;color:#484850">Pega una URL + contexto → genera videos y gráficas completas en segundos. Zero configuración.</div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 400px;gap:20px;align-items:start">
+    <!-- LEFT: Input -->
+    <div>
+      <!-- Client selector -->
+      <div class="card" style="padding:16px;margin-bottom:16px">
+        <label>🎯 Cliente (opcional — si ya existe)</label>
+        <select class="input" id="cta-client-select" style="font-size:13px">
+          <option value="">— Selecciona o deja vacío para scraping —</option>
+        </select>
+      </div>
+
+      <!-- URL input -->
+      <div class="card" style="padding:16px;margin-bottom:16px">
+        <label>🌐 URL del sitio web</label>
+        <div style="display:flex;gap:8px">
+          <input class="input" id="cta-url" type="url" placeholder="https://tusitio.com" style="flex:1;font-size:13px"/>
+          <button class="btn btn-ghost btn-sm" onclick="ctaScrapePreview()">🔍 Analizar</button>
+        </div>
+        <div id="cta-scraped-preview" style="display:none;margin-top:10px;padding:10px;background:#060608;border-radius:8px;border:1px solid #22c55e33">
+          <div style="font-size:11px;color:#22c55e;font-weight:700" id="cta-scraped-name"></div>
+          <div style="font-size:10px;color:#484850" id="cta-scraped-desc"></div>
+        </div>
+      </div>
+
+      <!-- Context block -->
+      <div class="card" style="padding:16px;margin-bottom:16px">
+        <label>✍️ Bloque de contexto</label>
+        <textarea class="input" id="cta-context" rows="4" placeholder="Describe tu negocio, producto estrella, oferta especial, público objetivo, diferenciador... Cuanto más detalle, mejor el resultado."></textarea>
+      </div>
+
+      <!-- Campaign settings -->
+      <div class="card" style="padding:16px;margin-bottom:16px">
+        <label style="margin-bottom:10px">🎬 Configuración de campaña</label>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div>
+            <div style="font-size:10px;color:#484850;margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px">Tono</div>
+            <select class="input" id="cta-tone" style="font-size:13px">
+              <option value="Inspirador">✨ Inspirador</option>
+              <option value="Urgente">🔥 Urgente</option>
+              <option value="Profesional">💼 Profesional</option>
+              <option value="Divertido">😄 Divertido</option>
+              <option value="Dramático">🎬 Dramático</option>
+            </select>
+          </div>
+          <div>
+            <div style="font-size:10px;color:#484850;margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px">Red Social</div>
+            <select class="input" id="cta-rrss" style="font-size:13px">
+              <option value="Instagram">📸 Instagram</option>
+              <option value="TikTok">🎵 TikTok</option>
+              <option value="LinkedIn">💼 LinkedIn</option>
+              <option value="YouTube">▶️ YouTube</option>
+              <option value="Ads">📢 Ads</option>
+            </select>
+          </div>
+          <div>
+            <div style="font-size:10px;color:#484850;margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px">Duración</div>
+            <select class="input" id="cta-duration" style="font-size:13px">
+              <option value="15">15s</option>
+              <option value="21" selected>21s</option>
+              <option value="30">30s</option>
+              <option value="45">45s</option>
+              <option value="60">60s</option>
+            </select>
+          </div>
+          <div>
+            <div style="font-size:10px;color:#484850;margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px">Generar</div>
+            <select class="input" id="cta-mode" style="font-size:13px">
+              <option value="both">Video + Gráficas</option>
+              <option value="video">Solo Video</option>
+              <option value="graphics">Solo Gráficas</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- CTA button -->
+      <button class="btn btn-primary" style="width:100%;padding:16px;font-size:16px;font-weight:900" id="cta-gen-btn" onclick="runClickToAd()">
+        ⚡ Generar Campaña Completa
+      </button>
+    </div>
+
+    <!-- RIGHT: Results -->
+    <div style="position:sticky;top:80px">
+      <!-- Status -->
+      <div id="cta-status" class="card" style="padding:16px;margin-bottom:16px;display:none">
+        <div style="font-size:12px;font-weight:700;color:#f97316;margin-bottom:4px" id="cta-status-label">⏳ Analizando...</div>
+        <div class="progress-bar"><div class="progress-fill" id="cta-progress-fill" style="width:0%"></div></div>
+      </div>
+
+      <!-- Script preview -->
+      <div id="cta-script-result" class="card" style="padding:16px;margin-bottom:16px;display:none">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+          <label style="margin:0;font-size:12px">📝 Guion generado</label>
+          <span id="cta-engine-badge" style="font-size:9px;background:rgba(249,115,22,.15);color:#f97316;padding:2px 8px;border-radius:4px;font-weight:700"></span>
+        </div>
+        <div id="cta-script-text" style="font-size:11px;color:#94a3b8;line-height:1.6;max-height:150px;overflow-y:auto;background:#060608;border-radius:8px;padding:10px"></div>
+        <div style="margin-top:10px;display:flex;gap:6px">
+          <button class="btn btn-xs btn-primary" onclick="applyCtaScriptToCreate()">→ Usar en Crear Video</button>
+          <button class="btn btn-xs btn-ghost" onclick="previewCtaVoice()">🔊 Preview voz</button>
+        </div>
+      </div>
+
+      <!-- Graphics preview -->
+      <div id="cta-graphics-result" class="card" style="padding:16px;margin-bottom:16px;display:none">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+          <label style="margin:0;font-size:12px">🎨 Gráficas generadas</label>
+          <button class="btn btn-xs btn-ghost" onclick="generateCtaVariants()">🔁 10 estilos</button>
+        </div>
+        <div id="cta-graphics-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:8px"></div>
+      </div>
+
+      <!-- AI Edit Chat -->
+      <div id="cta-edit-section" class="card" style="padding:16px;display:none">
+        <label style="margin-bottom:8px;font-size:12px">💬 Editar con prompt</label>
+        <div id="cta-chat-messages" style="max-height:120px;overflow-y:auto;display:flex;flex-direction:column;gap:6px;margin-bottom:8px"></div>
+        <div style="display:flex;gap:6px">
+          <input class="input" id="cta-edit-input" placeholder="Ej: cambia fondo a gradient, nuevo título..." style="flex:1;font-size:12px" onkeydown="if(event.key==='Enter')sendCtaEdit()"/>
+          <button class="btn btn-primary btn-sm" onclick="sendCtaEdit()">→</button>
+        </div>
+      </div>
+
+      <!-- Variants grid (10 styles) -->
+      <div id="cta-variants-section" style="display:none;margin-top:16px">
+        <div style="font-size:11px;font-weight:700;color:#e2e8f0;margin-bottom:10px">🔁 10 estilos distintos</div>
+        <div id="cta-variants-grid" style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ TAB: LIBRARY ══ -->
+<section id="tab-library-content" class="hidden fade-in">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+    <div>
+      <h2 style="font-size:18px;font-weight:800;color:#e2e8f0">📁 Librería de Videos</h2>
+      <div style="font-size:12px;color:#484850;margin-top:2px" id="library-count"></div>
+    </div>
+    <button class="btn btn-sm btn-secondary" onclick="loadLibrary()">🔄 Actualizar</button>
+  </div>
+  <div id="library-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px">
+    <div style="grid-column:1/-1;text-align:center;padding:48px;color:#323238">
+      <div style="font-size:32px;margin-bottom:8px">📂</div>
+      <div>Cargando librería...</div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ TAB: CLIENTS ══ -->
+<section id="tab-clients-content" class="hidden fade-in">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+    <div>
+      <h2 style="font-size:18px;font-weight:800;color:#e2e8f0">🎯 Clientes & Marcas</h2>
+      <div style="font-size:12px;color:#484850;margin-top:2px" id="clients-count"></div>
+    </div>
+    <button class="btn btn-sm btn-primary" onclick="openNewClientModal()">+ Nuevo cliente</button>
+  </div>
+  <div id="clients-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px"></div>
+</section>
+
+</div><!-- /LEFT -->
+
+<!-- ════════════════════ RIGHT: AI SIDEBAR ════════════════════ -->
+<aside>
+
+  <!-- Assets upload -->
+  <div class="card" style="padding:18px;margin-bottom:16px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+      <label style="margin:0">📎 Assets del proyecto</label>
+      <span style="font-size:10px;color:#323238">max 10 vid + 15 img</span>
+    </div>
+    <div class="dropzone" id="asset-dropzone" onclick="document.getElementById('asset-input').click()" ondragover="event.preventDefault();this.classList.add('dragover')" ondragleave="this.classList.remove('dragover')" ondrop="onAssetDrop(event)">
+      <div style="font-size:24px;margin-bottom:6px">📁</div>
+      <div style="font-size:12px;font-weight:600;color:#484850">Arrastra o haz click</div>
+      <div style="font-size:11px;color:#323238;margin-top:3px">MP4, MOV, JPG, PNG, GIF</div>
+    </div>
+    <input type="file" id="asset-input" multiple accept="video/*,image/*" style="display:none" onchange="onAssetSelect(event)"/>
+    <div id="asset-list" style="margin-top:10px;display:flex;flex-direction:column;gap:4px"></div>
+
+    <!-- Google Drive button -->
+    <button class="btn btn-ghost btn-sm" style="width:100%;margin-top:10px" onclick="openDrivePicker()" id="drive-btn">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M4.56 2L0 9.75l2.28 3.95L6.84 5.94 4.56 2z" fill="#0066DA"/><path d="M14.22 2H9.78L2.28 14.91l2.28 3.96 7.56-13.08L14.22 2z" fill="#00AC47"/><path d="M20.94 9.13l-2.28-3.95-9 15.6 2.28 3.95 9-15.6z" fill="#EA4335"/></svg>
+      Importar de Google Drive
+    </button>
+  </div>
+
+  <!-- AI Script Refinement -->
+  <div class="card" style="padding:18px;margin-bottom:16px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+      <label style="margin:0">🤖 Refinamiento IA</label>
+      <span style="font-size:10px;padding:2px 7px;border-radius:8px;background:rgba(249,115,22,.15);color:#f97316;font-weight:700">BETA</span>
+    </div>
+    <div id="ai-chat" style="display:flex;flex-direction:column;gap:8px;max-height:220px;overflow-y:auto;margin-bottom:10px;min-height:60px">
+      <div class="chat-msg chat-ai" style="max-width:100%">¡Hola! Puedo refinar el guion o la marca. Dime qué cambiar.</div>
+    </div>
+    <div style="display:flex;gap:6px">
+      <input class="input" id="ai-input" placeholder="cambia el tono a más urgente..." style="flex:1;font-size:12px;padding:8px 12px" onkeydown="if(event.key==='Enter')sendAiMessage()"/>
+      <button class="btn btn-sm btn-primary" onclick="sendAiMessage()">↑</button>
+    </div>
+    <div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:8px">
+      <button class="btn btn-xs btn-ghost" onclick="quickPrompt('Más corto y directo')">✂️ Acortar</button>
+      <button class="btn btn-xs btn-ghost" onclick="quickPrompt('Tono más urgente')">🔥 Urgente</button>
+      <button class="btn btn-xs btn-ghost" onclick="quickPrompt('Modo oscuro')">🌙 Dark mode</button>
+      <button class="btn btn-xs btn-ghost" onclick="quickPrompt('Color primario azul')">🔵 Azul</button>
+    </div>
+  </div>
+
+  <!-- Integration status -->
+  <div class="card" style="padding:16px">
+    <label style="margin-bottom:10px">⚙️ Integraciones</label>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:#060608;border-radius:8px">
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-size:14px">🎙</span>
+          <div>
+            <div style="font-size:12px;font-weight:600;color:#e2e8f0">ElevenLabs</div>
+            <div style="font-size:10px;color:#323238">TTS + SFX</div>
+          </div>
+        </div>
+        <span id="el-status" style="font-size:10px;font-weight:700;color:#323238">NO KEY</span>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:#060608;border-radius:8px;opacity:.5">
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-size:14px">🎥</span>
+          <div>
+            <div style="font-size:12px;font-weight:600;color:#e2e8f0">Google Veo 3</div>
+            <div style="font-size:10px;color:#323238">Video generativo</div>
+          </div>
+        </div>
+        <span style="font-size:10px;font-weight:700;color:#323238;background:rgba(249,115,22,.1);padding:2px 6px;border-radius:5px">SOON</span>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:#060608;border-radius:8px;opacity:.5">
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-size:14px">🎵</span>
+          <div>
+            <div style="font-size:12px;font-weight:600;color:#e2e8f0">Google Lyria 3</div>
+            <div style="font-size:10px;color:#323238">Música generativa</div>
+          </div>
+        </div>
+        <span style="font-size:10px;font-weight:700;color:#323238;background:rgba(249,115,22,.1);padding:2px 6px;border-radius:5px">SOON</span>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:#060608;border-radius:8px;opacity:.5">
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-size:14px">🧠</span>
+          <div>
+            <div style="font-size:12px;font-weight:600;color:#e2e8f0">Gemini Flash</div>
+            <div style="font-size:10px;color:#323238">Análisis de clips</div>
+          </div>
+        </div>
+        <span style="font-size:10px;font-weight:700;color:#323238;background:rgba(249,115,22,.1);padding:2px 6px;border-radius:5px">SOON</span>
+      </div>
+    </div>
+  </div>
+
+</aside>
+</main>
+
+<!-- ══════════════════════════════════════════ MODALS -->
+
+<!-- API Key Modal -->
+<div id="api-key-modal" class="modal-overlay hidden">
+  <div class="modal">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+      <h3 style="font-size:16px;font-weight:800;color:#e2e8f0">🔑 ElevenLabs API Key</h3>
+      <button class="btn btn-xs btn-ghost" onclick="closeModal('api-key-modal')">✕</button>
+    </div>
+    <label>API Key</label>
+    <input class="input" id="api-key-input" type="password" placeholder="sk_..."/>
+    <div style="font-size:11px;color:#323238;margin-top:6px;margin-bottom:16px">Se guarda solo en tu navegador. Nunca se envía a terceros.</div>
+    <div style="display:flex;gap:10px">
+      <button class="btn btn-primary" style="flex:1" onclick="saveApiKey()">Guardar</button>
+      <button class="btn btn-secondary" onclick="closeModal('api-key-modal')">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- New Client Modal -->
+<div id="new-client-modal" class="modal-overlay hidden">
+  <div class="modal">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+      <h3 style="font-size:16px;font-weight:800;color:#e2e8f0">🎯 Nuevo Cliente</h3>
+      <button class="btn btn-xs btn-ghost" onclick="closeModal('new-client-modal')">✕</button>
+    </div>
+
+    <div style="margin-bottom:14px">
+      <label>URL del sitio web</label>
+      <div style="display:flex;gap:8px">
+        <input class="input" id="nc-url" type="url" placeholder="https://micliente.com" style="flex:1"/>
+        <button class="btn btn-sm btn-secondary" onclick="scrapeNewClient()" id="nc-scrape-btn">🔍 Auto</button>
+      </div>
+    </div>
+    <div style="margin-bottom:12px">
+      <label>Nombre del cliente *</label>
+      <input class="input" id="nc-name" placeholder="Hapee, Nike, Mi Cliente..."/>
+    </div>
+    <div style="margin-bottom:12px">
+      <label>ID único *</label>
+      <input class="input" id="nc-id" placeholder="hapee, nike, mi-cliente" oninput="this.value=this.value.toLowerCase().replace(/[^a-z0-9-]/g,'-')"/>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+      <div>
+        <label>Color primario</label>
+        <div class="color-row">
+          <input type="color" id="nc-primary" value="#f97316"/>
+          <input class="input" id="nc-primary-text" value="#f97316" oninput="syncColor('primary')"/>
+        </div>
+      </div>
+      <div>
+        <label>Color secundario</label>
+        <div class="color-row">
+          <input type="color" id="nc-secondary" value="#ec4899"/>
+          <input class="input" id="nc-secondary-text" value="#ec4899" oninput="syncColor('secondary')"/>
+        </div>
+      </div>
+    </div>
+    <div style="margin-bottom:16px">
+      <label>Logo (PNG/SVG)</label>
+      <div class="dropzone" style="padding:16px" onclick="document.getElementById('nc-logo').click()">
+        <div style="font-size:11px;color:#484850">Haz click para subir logo</div>
+        <div id="nc-logo-preview" style="margin-top:6px;font-size:11px;color:#f97316;display:none"></div>
+      </div>
+      <input type="file" id="nc-logo" accept="image/*" style="display:none" onchange="onLogoSelect(event)"/>
+    </div>
+    <div style="display:flex;gap:10px">
+      <button class="btn btn-primary" style="flex:1" onclick="createClient()">Crear Cliente</button>
+      <button class="btn btn-secondary" onclick="closeModal('new-client-modal')">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Video preview modal (library) -->
+<div id="video-preview-modal" class="modal-overlay hidden">
+  <div class="modal" style="max-width:600px;width:96vw">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <h3 style="font-size:15px;font-weight:700;color:#e2e8f0" id="preview-modal-title">Preview</h3>
+      <button class="btn btn-xs btn-ghost" onclick="closeModal('video-preview-modal')">✕</button>
+    </div>
+    <video id="preview-modal-video" controls style="width:100%;border-radius:10px;background:#000;max-height:70vh"></video>
+    <div style="display:flex;gap:8px;margin-top:14px">
+      <a id="preview-download" class="btn btn-primary btn-sm" download style="text-decoration:none">⬇ Descargar</a>
+      <button class="btn btn-secondary btn-sm" onclick="shareVideo('slack',document.getElementById('preview-download').href)">📣 Slack</button>
+      <button class="btn btn-secondary btn-sm" onclick="closeModal('video-preview-modal')">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════ AI INTEGRATIONS MODAL ══════════════════ -->
+<div id="ai-keys-modal" class="modal-overlay hidden">
+  <div class="modal" style="width:680px;max-height:92vh">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+      <div>
+        <h3 style="font-size:16px;font-weight:800;color:#e2e8f0">⚙️ Integraciones de IA</h3>
+        <div style="font-size:11px;color:#484850;margin-top:2px">Conecta tus APIs — keys guardadas de forma segura en tu servidor local</div>
+      </div>
+      <button class="btn btn-xs btn-ghost" onclick="closeModal('ai-keys-modal')">✕</button>
+    </div>
+
+    <!-- Image Generation -->
+    <div style="margin-bottom:16px">
+      <div style="font-size:11px;font-weight:700;color:#f97316;text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px">🎨 Imágenes IA</div>
+      <div style="display:flex;flex-direction:column;gap:6px">
+
+        <!-- Gemini Flash — AI Copywriter -->
+        <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:#060608;border-radius:10px;border:1px solid #1a73e833">
+          <div style="width:30px;height:30px;border-radius:7px;background:linear-gradient(135deg,#1a73e8,#34a853);display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0">✨</div>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:12px;font-weight:700;color:#e2e8f0">Gemini 2.0 Flash <span style="font-size:9px;background:rgba(26,115,232,.2);color:#60a5fa;padding:1px 5px;border-radius:4px;font-weight:700;margin-left:4px">COPYWRITER</span></div>
+            <div style="font-size:10px;color:#484850">Guiones modernos con narrativa disruptiva · Google AI Studio</div>
+          </div>
+          <input class="input" id="key-GEMINI_API_KEY" type="password" placeholder="AIzaSy..." style="width:170px;font-size:11px;padding:5px 8px"/>
+        </div>
+
+        <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:#060608;border-radius:10px;border:1px solid #1c1c22">
+          <div style="width:30px;height:30px;border-radius:7px;background:#10b981;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0">🤖</div>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:12px;font-weight:700;color:#e2e8f0">OpenAI DALL-E 3</div>
+            <div style="font-size:10px;color:#484850">Máxima calidad imágenes — $0.04/imagen</div>
+          </div>
+          <input class="input" id="key-OPENAI_API_KEY" type="password" placeholder="sk-..." style="width:170px;font-size:11px;padding:5px 8px"/>
+        </div>
+
+        <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:#060608;border-radius:10px;border:1px solid #1c1c22">
+          <div style="width:30px;height:30px;border-radius:7px;background:#7c3aed;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0">⚡</div>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:12px;font-weight:700;color:#e2e8f0">Stability AI</div>
+            <div style="font-size:10px;color:#484850">Stable Diffusion Core — Alta calidad</div>
+          </div>
+          <input class="input" id="key-STABILITY_API_KEY" type="password" placeholder="sk-..." style="width:170px;font-size:11px;padding:5px 8px"/>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+          <div style="display:flex;align-items:center;gap:8px;padding:9px 10px;background:#060608;border-radius:10px;border:1px solid #1c1c22">
+            <div style="width:26px;height:26px;border-radius:6px;background:#ea580c;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0">🔥</div>
+            <div style="flex:1;min-width:0">
+              <div style="font-size:11px;font-weight:700;color:#e2e8f0">Fal.ai</div>
+              <div style="font-size:9px;color:#484850">FLUX + Kling video</div>
+            </div>
+            <input class="input" id="key-FAL_API_KEY" type="password" placeholder="fal-..." style="width:100px;font-size:10px;padding:4px 6px"/>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;padding:9px 10px;background:#060608;border-radius:10px;border:1px solid #1c1c22">
+            <div style="width:26px;height:26px;border-radius:6px;background:#0891b2;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0">🔮</div>
+            <div style="flex:1;min-width:0">
+              <div style="font-size:11px;font-weight:700;color:#e2e8f0">Replicate</div>
+              <div style="font-size:9px;color:#484850">FLUX + Luma + Pika</div>
+            </div>
+            <input class="input" id="key-REPLICATE_API_KEY" type="password" placeholder="r8_..." style="width:100px;font-size:10px;padding:4px 6px"/>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Video AI -->
+    <div style="margin-bottom:16px">
+      <div style="font-size:11px;font-weight:700;color:#ec4899;text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px">🎬 Video IA Generativo</div>
+      <div style="display:flex;flex-direction:column;gap:6px">
+
+        <!-- Kling Native API — new priority provider -->
+        <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:#060608;border-radius:10px;border:1px solid #8b5cf633">
+          <div style="width:30px;height:30px;border-radius:7px;background:linear-gradient(135deg,#8b5cf6,#7c3aed);display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0">⚡</div>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:12px;font-weight:700;color:#e2e8f0">Kling AI 1.6 <span style="font-size:9px;background:rgba(34,197,94,.15);color:#22c55e;padding:1px 5px;border-radius:4px;font-weight:700;margin-left:4px">NATIVE</span></div>
+            <div style="font-size:10px;color:#484850">API directa — sin intermediarios · prioridad #1</div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:3px">
+            <input class="input" id="key-KLING_ACCESS_KEY" type="password" placeholder="Access Key..." style="width:150px;font-size:10px;padding:4px 6px"/>
+            <input class="input" id="key-KLING_SECRET_KEY" type="password" placeholder="Secret Key..." style="width:150px;font-size:10px;padding:4px 6px"/>
+          </div>
+        </div>
+
+        <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:#060608;border-radius:10px;border:1px solid #1c1c22">
+          <div style="width:30px;height:30px;border-radius:7px;background:#dc2626;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0">🎬</div>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:12px;font-weight:700;color:#e2e8f0">Runway ML Gen-3 <span style="font-size:9px;color:#484850">(fallback)</span></div>
+            <div style="font-size:10px;color:#484850">Video de 5s por escena · <a href="https://app.runwayml.com/account/api-keys" target="_blank" style="color:#f97316;text-decoration:none">Obtener key →</a></div>
+          </div>
+          <input class="input" id="key-RUNWAY_API_KEY" type="password" placeholder="key_0f..." style="width:170px;font-size:11px;padding:5px 8px"/>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+          <div style="display:flex;align-items:center;gap:8px;padding:9px 10px;background:#060608;border-radius:10px;border:1px solid #1c1c22">
+            <div style="width:26px;height:26px;border-radius:6px;background:#7c3aed;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0">🌟</div>
+            <div style="flex:1;min-width:0">
+              <div style="font-size:11px;font-weight:700;color:#e2e8f0">Kling (Fal.ai)</div>
+              <div style="font-size:9px;color:#484850">fallback si no hay native key</div>
+            </div>
+            <span style="font-size:9px;background:rgba(34,197,94,.1);color:#22c55e;padding:2px 5px;border-radius:4px;font-weight:700">FAL KEY</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;padding:9px 10px;background:#060608;border-radius:10px;border:1px solid #1c1c22">
+            <div style="width:26px;height:26px;border-radius:6px;background:#0891b2;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0">💫</div>
+            <div style="flex:1;min-width:0">
+              <div style="font-size:11px;font-weight:700;color:#e2e8f0">Luma + Pika</div>
+              <div style="font-size:9px;color:#484850">vía Replicate key ↑</div>
+            </div>
+            <span style="font-size:9px;background:rgba(34,197,94,.1);color:#22c55e;padding:2px 5px;border-radius:4px;font-weight:700">REPL KEY</span>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;opacity:.5">
+          <div style="padding:8px 10px;background:#060608;border-radius:8px;border:1px solid #1c1c22;display:flex;align-items:center;gap:8px">
+            <span style="font-size:16px">🎥</span>
+            <div style="flex:1"><div style="font-size:11px;font-weight:700;color:#e2e8f0">Google Veo 3</div><div style="font-size:9px;color:#484850">Vertex AI — próximamente</div></div>
+            <span style="font-size:8px;background:rgba(249,115,22,.1);color:#f97316;padding:1px 4px;border-radius:3px;font-weight:700">SOON</span>
+          </div>
+          <div style="padding:8px 10px;background:#060608;border-radius:8px;border:1px solid #1c1c22;display:flex;align-items:center;gap:8px">
+            <span style="font-size:16px">🌊</span>
+            <div style="flex:1"><div style="font-size:11px;font-weight:700;color:#e2e8f0">Sora (OpenAI)</div><div style="font-size:9px;color:#484850">vía OpenAI key ↑ (beta)</div></div>
+            <span style="font-size:8px;background:rgba(249,115,22,.1);color:#f97316;padding:1px 4px;border-radius:3px;font-weight:700">BETA</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stock + Audio -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
+      <div>
+        <div style="font-size:11px;font-weight:700;color:#06b6d4;text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px">📸 Stock</div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:#060608;border-radius:9px;border:1px solid #1c1c22">
+            <span style="font-size:14px">📷</span>
+            <div style="flex:1;min-width:0"><div style="font-size:11px;font-weight:700;color:#e2e8f0">Pexels</div></div>
+            <input class="input" id="key-PEXELS_API_KEY" type="password" placeholder="key..." style="width:90px;font-size:10px;padding:4px 6px"/>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:#060608;border-radius:9px;border:1px solid #1c1c22">
+            <span style="font-size:14px">🌄</span>
+            <div style="flex:1;min-width:0"><div style="font-size:11px;font-weight:700;color:#e2e8f0">Pixabay</div></div>
+            <input class="input" id="key-PIXABAY_API_KEY" type="password" placeholder="key..." style="width:90px;font-size:10px;padding:4px 6px"/>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div style="font-size:11px;font-weight:700;color:#8b5cf6;text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px">🎵 Audio / TTS</div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:#060608;border-radius:9px;border:1px solid #1c1c22">
+            <span style="font-size:14px">🎙</span>
+            <div style="flex:1;min-width:0"><div style="font-size:11px;font-weight:700;color:#e2e8f0">ElevenLabs</div><div style="font-size:9px;color:#484850">TTS + SFX</div></div>
+            <input class="input" id="key-ELEVENLABS_API_KEY_SETTINGS" type="password" placeholder="sk_..." style="width:90px;font-size:10px;padding:4px 6px"/>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:#060608;border-radius:9px;border:1px solid #1c1c22;opacity:.5">
+            <span style="font-size:14px">🎵</span>
+            <div style="flex:1;min-width:0"><div style="font-size:11px;font-weight:700;color:#e2e8f0">Google Lyria 3</div><div style="font-size:9px;color:#484850">Música generativa</div></div>
+            <span style="font-size:8px;background:rgba(249,115,22,.1);color:#f97316;padding:1px 4px;border-radius:3px;font-weight:700">SOON</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Google Drive -->
+    <div style="margin-bottom:16px;padding:12px;background:#060608;border-radius:10px;border:1px solid #1c1c22">
+      <div style="display:flex;align-items:center;gap:10px">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M4.56 2L0 9.75l2.28 3.95L6.84 5.94 4.56 2z" fill="#0066DA"/><path d="M14.22 2H9.78L2.28 14.91l2.28 3.96 7.56-13.08L14.22 2z" fill="#00AC47"/><path d="M20.94 9.13l-2.28-3.95-9 15.6 2.28 3.95 9-15.6z" fill="#EA4335"/></svg>
+        <div style="flex:1">
+          <div style="font-size:13px;font-weight:700;color:#e2e8f0">Google Drive</div>
+          <div style="font-size:10px;color:#484850">Importa videos/fotos desde Drive directamente</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:4px">
+          <input class="input" id="key-GOOGLE_CLIENT_ID" type="text" placeholder="CLIENT_ID..." style="width:160px;font-size:10px;padding:4px 6px"/>
+          <input class="input" id="key-GOOGLE_CLIENT_SECRET" type="password" placeholder="CLIENT_SECRET..." style="width:160px;font-size:10px;padding:4px 6px"/>
+        </div>
+        <button class="btn btn-xs btn-secondary" onclick="saveDriveClientId()">Guardar</button>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:10px;margin-bottom:14px">
+      <button class="btn btn-primary" style="flex:1" onclick="saveAllApiKeys()">💾 Guardar todas las keys</button>
+      <button class="btn btn-secondary" onclick="closeModal('ai-keys-modal')">Cancelar</button>
+    </div>
+
+    <!-- API Status Dashboard -->
+    <div id="api-status-dashboard" style="padding:12px;background:#060608;border-radius:10px;border:1px solid #1c1c22">
+      <div style="font-size:10px;color:#484850;text-align:center">Cargando estado de APIs...</div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════════
+const S = {
+  step: 1,
+  format: '9:16',
+  duration: 21,
+  audioMode: 'both',
+  tone: 'Inspirador',
+  rrss: 'TikTok',
+  mood: 'Cinematic',
+  sfxOnCta: true,
+  transition: 'zoom-in',
+  clientId: null,
+  scrapedBrand: null,
+  script: '',
+  scenes: [],
+  sceneImageUrls: [],
+  jobId: null,
+  videoUrl: null,
+  aiMode: 'template',
+  imageStyle: 'photorealistic',
+  creativity: 50,
+};
+
+// ═══════════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', async () => {
+  loadClients();
+  updateSfxToggle();
+
+  // Auto-load server keys into UI fields so user sees they're configured
+  try {
+    const r = await fetch('/api/keys');
+    const d = await r.json();
+    if (d.success) {
+      // Show ElevenLabs status as active if server has key
+      if (d.keys.ELEVENLABS_API_KEY) {
+        document.getElementById('api-key-dot').style.background = '#22c55e';
+        document.getElementById('api-key-label').style.color = '#22c55e';
+        document.getElementById('api-key-label').textContent = 'ElevenLabs ✓';
+        const status = document.getElementById('el-status');
+        if (status) { status.textContent = 'ACTIVE'; status.style.color = '#22c55e'; }
+      }
+      // Show active integrations in the status bar
+      const activeKeys = Object.entries(d.keys).filter(([k,v]) => v && k !== 'GOOGLE_CLIENT_SECRET').map(([k]) => k.replace('_API_KEY','').replace('_ACCESS_KEY','').replace('_SECRET_KEY',''));
+      if (activeKeys.length > 0) console.log(`✅ Active APIs: ${[...new Set(activeKeys)].join(', ')}`);
+    }
+  } catch (_) {}
+
+  checkApiKey();
+});
+
+// ═══════════════════════════════════════════════════════════════
+// TABS
+// ═══════════════════════════════════════════════════════════════
+function showTab(name) {
+  ['create','graphics','clicktoad','library','clients'].forEach(t => {
+    document.getElementById(`tab-${t}-content`)?.classList.toggle('hidden', t !== name);
+    document.getElementById(`tab-${t}`)?.classList.toggle('active', t === name);
+  });
+  if (name === 'library') loadLibrary();
+  if (name === 'clients') loadClientsTab();
+  if (name === 'graphics') initGraphicsTab();
+  if (name === 'clicktoad') initClickToAdTab();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// STEP NAVIGATION
+// ═══════════════════════════════════════════════════════════════
+function goToStep(n) {
+  S.step = n;
+  document.getElementById('step1').classList.toggle('hidden', n !== 1);
+  document.getElementById('step2').classList.toggle('hidden', n !== 2);
+  document.getElementById('step3').classList.toggle('hidden', n !== 3);
+  updateStepIndicator(n);
+  // Reset step-specific state when navigating back
+  if (n < 3) {
+    document.getElementById('render-result')?.classList.add('hidden');
+    document.getElementById('render-error')?.classList.add('hidden');
+    const rb = document.getElementById('render-btn');
+    if (rb) rb.disabled = false;
+  }
+  if (n < 2) {
+    const gb = document.getElementById('gen-btn');
+    if (gb) gb.disabled = false;
+  }
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function updateStepIndicator(n) {
+  for (let i = 1; i <= 3; i++) {
+    const dot = document.getElementById(`dot-${i}`);
+    dot.className = 'step-dot ' + (i < n ? 'done' : i === n ? 'active' : 'pending');
+    dot.textContent = i < n ? '✓' : i;
+    if (i > 1) {
+      const line = document.getElementById(`line-${i-1}${i}`);
+      if (line) line.className = 'step-line ' + (i <= n ? 'done' : '');
+    }
+    const label = document.getElementById(`label-${i}`);
+    if (label) label.style.color = i === n ? '#f97316' : i < n ? '#22c55e' : '#323238';
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// FORMAT
+// ═══════════════════════════════════════════════════════════════
+function setFormat(f) {
+  S.format = f;
+  document.querySelectorAll('.format-card').forEach(c => c.classList.toggle('active', c.dataset.format === f));
+}
+
+// ═══════════════════════════════════════════════════════════════
+// DURATION
+// ═══════════════════════════════════════════════════════════════
+function updateDuration() {
+  S.duration = parseInt(document.getElementById('duration-slider').value);
+  document.getElementById('duration-display').textContent = S.duration + 's';
+}
+
+// ═══════════════════════════════════════════════════════════════
+// AUDIO MODE
+// ═══════════════════════════════════════════════════════════════
+function setAudioMode(m) {
+  S.audioMode = m;
+  document.querySelectorAll('.audio-btn').forEach(b => b.classList.toggle('active', b.dataset.mode === m));
+}
+
+// ═══════════════════════════════════════════════════════════════
+// PILLS
+// ═══════════════════════════════════════════════════════════════
+function setPill(el, group) {
+  document.querySelectorAll(`.pill[data-group="${group}"]`).forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  // Always use data-value if present, never parse text (avoids emoji/label confusion)
+  const val = el.dataset.value || el.textContent.trim();
+  if (group === 'tone')     S.tone = val;
+  if (group === 'rrss')     S.rrss = val;
+  if (group === 'mood')     S.mood = val;
+  if (group === 'imgstyle') S.imageStyle = val;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SFX TOGGLE
+// ═══════════════════════════════════════════════════════════════
+function updateSfxToggle() {
+  // SFX is now always-on (auto branding), keep S.sfxOnCta = true
+  S.sfxOnCta = true;
+}
+
+function updateCreativity(val) {
+  S.creativity = parseInt(val);
+  const labels = val < 20 ? 'Conservador' : val < 40 ? 'Moderado' : val < 60 ? 'Equilibrado' : val < 80 ? 'Atrevido' : '🔥 Salvaje';
+  document.getElementById('creativity-val').textContent = `${val} — ${labels}`;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// PROMPT COUNTER
+// ═══════════════════════════════════════════════════════════════
+function updatePromptCounter() {
+  const len = document.getElementById('prompt-input').value.length;
+  document.getElementById('prompt-counter').textContent = `${len} / 500`;
+}
+
+// ─── TTS auto-sync ─────────────────────────────────────────────
+let _ttsTimer = null;
+
+function scheduleVoicePreview() {
+  // Debounce: 2.5s after user stops typing
+  clearTimeout(_ttsTimer);
+  const el = document.getElementById('tts-sync-indicator');
+  if (el) { el.style.display = 'inline'; el.textContent = '✏️ editado — preview voz listo'; }
+}
+
+async function previewVoice() {
+  const script = document.getElementById('script-editor').value.trim();
+  const apiKey = localStorage.getItem('elevenlabs_api_key');
+  if (!script) return notify('Escribe el guion primero', 'error');
+  if (!apiKey) return notify('Configura ElevenLabs API Key para preview', 'error');
+
+  const btn = document.getElementById('preview-tts-btn');
+  const indicator = document.getElementById('tts-sync-indicator');
+  btn.textContent = '⏳';
+  btn.disabled = true;
+  if (indicator) { indicator.style.display = 'inline'; indicator.textContent = '⏳ generando audio...'; }
+
+  try {
+    const r = await fetch('/api/tts-preview', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ script, apiKey }),
+    });
+    const d = await r.json();
+    if (!d.success) throw new Error(d.error);
+
+    const player = document.getElementById('tts-preview-player');
+    player.src = d.url;
+    player.style.display = 'block';
+    player.play();
+    if (indicator) { indicator.textContent = '✅ voz sincronizada'; }
+    notify('🔊 Preview de voz listo', 'success');
+  } catch (e) {
+    notify('TTS error: ' + e.message, 'error');
+    if (indicator) indicator.style.display = 'none';
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '🔊 Preview voz';
+  }
+}
+
+function updateWordCount() {
+  const words = document.getElementById('script-editor').value.trim().split(/\s+/).filter(Boolean);
+  const secs = Math.round(words.length / 2.2);
+  document.getElementById('word-count').textContent = `${words.length} palabras · ~${secs}s`;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// AI MODE + MASHUP MODE
+// ═══════════════════════════════════════════════════════════════
+let currentMashupMode = 'intelligent';
+
+function setMashupMode(mode) {
+  currentMashupMode = mode;
+  const btnInt = document.getElementById('btn-mashup-intelligent');
+  const btnMan = document.getElementById('btn-mashup-manual');
+  if (btnInt) {
+    btnInt.style.background = mode === 'intelligent' ? 'linear-gradient(135deg,#6366f1,#8b5cf6)' : 'transparent';
+    btnInt.style.color = mode === 'intelligent' ? '#fff' : '#64748b';
+  }
+  if (btnMan) {
+    btnMan.style.background = mode === 'manual' ? 'linear-gradient(135deg,#6366f1,#8b5cf6)' : 'transparent';
+    btnMan.style.color = mode === 'manual' ? '#fff' : '#64748b';
+  }
+}
+
+function setAiMode(m) {
+  S.aiMode = m;
+  ['mashup','template','veo'].forEach(id => {
+    const el = document.getElementById(`mode-${id}`);
+    if (!el) return;
+    const isActive = id === m;
+    el.style.border = isActive ? '2px solid #f97316' : '1px solid #1c1c22';
+    el.style.background = isActive ? 'rgba(249,115,22,.05)' : '';
+    const label = el.querySelector('div:nth-child(2)');
+    if (label) label.style.color = isActive ? '#f97316' : '#e2e8f0';
+  });
+  // Show/hide mashup mode selector
+  const mashupSel = document.getElementById('mashup-mode-selector');
+  if (mashupSel) mashupSel.style.display = m === 'mashup' ? 'flex' : 'none';
+}
+
+// ═══════════════════════════════════════════════════════════════
+// BRAND SCRAPING
+// ═══════════════════════════════════════════════════════════════
+async function scrapeBrand() {
+  const url = document.getElementById('brand-url').value.trim();
+  if (!url) return notify('Ingresa una URL primero', 'error');
+
+  const btn = document.getElementById('scrape-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spin">⏳</span> Scrapeando...';
+
+  try {
+    const r = await fetch('/api/brand/scrape', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ url }),
+    });
+    const data = await r.json();
+    if (!data.success) throw new Error(data.error);
+
+    S.scrapedBrand = data.brand;
+    showBrandPreview(data.brand);
+    notify(`✅ Marca scrapeada: ${data.brand.displayName}`, 'success');
+  } catch (e) {
+    notify(`Error scraping: ${e.message}`, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '🔍 Scrapear';
+  }
+}
+
+function showBrandPreview(brand) {
+  const preview = document.getElementById('brand-preview');
+  preview.classList.remove('hidden');
+  document.getElementById('brand-color-dot').style.background = brand.gradient || brand.colors?.primary || '#888';
+  document.getElementById('brand-preview-name').textContent = brand.displayName;
+  document.getElementById('brand-preview-url').textContent = brand.website;
+  const colorsEl = document.getElementById('brand-preview-colors');
+  colorsEl.innerHTML = [brand.colors?.primary, brand.colors?.secondary]
+    .filter(Boolean)
+    .map(c => `<div style="width:18px;height:18px;border-radius:4px;background:${c};border:1px solid rgba(255,255,255,.1)" title="${c}"></div>`)
+    .join('');
+}
+
+async function scrapeNewClient() {
+  const url = document.getElementById('nc-url').value.trim();
+  if (!url) return notify('Ingresa una URL', 'error');
+
+  const btn = document.getElementById('nc-scrape-btn');
+  btn.disabled = true;
+  btn.textContent = '⏳';
+
+  try {
+    const r = await fetch('/api/brand/scrape', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ url }),
+    });
+    const data = await r.json();
+    if (!data.success) throw new Error(data.error);
+    const b = data.brand;
+    if (b.displayName) document.getElementById('nc-name').value = b.displayName;
+    if (b.displayName) document.getElementById('nc-id').value = b.displayName.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-');
+    if (b.colors?.primary) { document.getElementById('nc-primary').value = b.colors.primary; document.getElementById('nc-primary-text').value = b.colors.primary; }
+    if (b.colors?.secondary) { document.getElementById('nc-secondary').value = b.colors.secondary; document.getElementById('nc-secondary-text').value = b.colors.secondary; }
+    notify(`✅ ${b.displayName} detectado`, 'success');
+  } catch (e) {
+    notify(e.message, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '🔍 Auto';
+  }
+}
+
+function syncColor(which) {
+  const text = document.getElementById(`nc-${which}-text`).value;
+  if (/^#[0-9a-fA-F]{3,6}$/.test(text)) document.getElementById(`nc-${which}`).value = text;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SCRIPT GENERATION
+// ═══════════════════════════════════════════════════════════════
+async function generateScript() {
+  const prompt = document.getElementById('prompt-input').value.trim();
+  if (!prompt) return notify('Describe tu video primero', 'error');
+
+  const btn = document.getElementById('gen-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spin">⏳</span> Generando guion...';
+
+  try {
+    // Determine brand name
+    let brandName = 'tu marca';
+    if (S.clientId) {
+      const r = await fetch(`/api/clients/${S.clientId}`);
+      const d = await r.json();
+      if (d.success) brandName = d.brand.displayName;
+    } else if (S.scrapedBrand) {
+      brandName = S.scrapedBrand.displayName;
+    }
+
+    // Get active tone value
+    const toneEl = document.querySelector('.pill[data-group="tone"].active');
+    const tone = toneEl?.dataset.value || S.tone;
+    const rrssEl = document.querySelector('.pill[data-group="rrss"].active');
+    const rrss = rrssEl?.dataset.value || S.rrss;
+
+    const creativity = parseInt(document.getElementById('creativity-slider')?.value || '50');
+
+    const r = await fetch('/api/script/generate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        prompt, brandName, clientId: S.clientId, tone, rrss,
+        durationSeconds: S.duration,
+        audioMode: S.audioMode,
+        creativity,
+      }),
+    });
+    const data = await r.json();
+    if (!data.success) throw new Error(data.error);
+
+    S.script = data.script;
+    S.scenes = data.scenes;
+    S.sceneImageUrls = []; // reset images when new script generated
+
+    // Auto-select transition based on tone vibe
+    const VIBE_TRANSITIONS = {
+      Urgente: 'zoom-in', Inspirador: 'fade', Profesional: 'slide-left',
+      Divertido: 'bounce', Dramático: 'blur',
+    };
+    const autoTrans = VIBE_TRANSITIONS[tone] || 'zoom-in';
+    document.getElementById('transition-select').value = autoTrans;
+
+    // Populate UI
+    document.getElementById('script-editor').value = data.script;
+    updateWordCount();
+    renderStoryboard(data.scenes);
+    document.getElementById('scene-count').textContent = `${data.scenes.length} escenas · ${data.wordCount || 0} palabras`;
+
+    // Engine badge
+    const engineBadge = data.engine === 'gemini' ? '✨ Gemini' : '⚡ Script generado';
+    const sceneCount  = data.scenes?.length || 0;
+    notify(`${engineBadge} — ${sceneCount} escenas listas`, 'success');
+
+    goToStep(2);
+  } catch (e) {
+    notify(`Error: ${e.message}`, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '✨ Generar Guion + Storyboard';
+  }
+}
+
+function regenerateScript() {
+  // Clear storyboard, audio preview and scene state to avoid inconsistencies
+  S.scenes = [];
+  S.jobId  = null;
+  const storyboard = document.getElementById('storyboard-cards');
+  if (storyboard) storyboard.innerHTML = '';
+  const audioPlayer = document.getElementById('tts-preview-player');
+  if (audioPlayer) { audioPlayer.src = ''; audioPlayer.parentElement && (audioPlayer.parentElement.style.display = 'none'); }
+  document.getElementById('scene-count').textContent = '';
+  notify('🔄 Regenerando guion...', 'info');
+  generateScript();
+}
+
+function shortenScript() {
+  const words = document.getElementById('script-editor').value.trim().split(/\s+/);
+  const shorter = words.slice(0, Math.floor(words.length * 0.75)).join(' ') + '.';
+  document.getElementById('script-editor').value = shorter;
+  updateWordCount();
+}
+
+function expandScript() {
+  const cur = document.getElementById('script-editor').value.trim();
+  document.getElementById('script-editor').value = cur + ' ¡No pierdas más tiempo! ' + S.scenes?.[S.scenes.length - 1]?.voiceover || '';
+  updateWordCount();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// STORYBOARD RENDERING
+// ═══════════════════════════════════════════════════════════════
+const SCENE_ICONS = { hook: '🎯', brand: '🏆', feature: '⚡', cta: '🚀' };
+const SCENE_COLORS = { hook: '#f97316', brand: '#8b5cf6', feature: '#06b6d4', cta: '#22c55e' };
+
+function renderStoryboard(scenes, imageUrls = []) {
+  const container = document.getElementById('storyboard-cards');
+  const dur = S.duration / scenes.length;
+  container.innerHTML = scenes.map((scene, i) => {
+    const start = scene.timestamp !== undefined ? scene.timestamp : Math.round(i * dur);
+    const end   = Math.round(start + dur);
+    const color = SCENE_COLORS[scene.type] || '#f97316';
+    const imgUrl = imageUrls[i] || null;
+    const vp = scene.visual_prompt || '';
+    const sfx = scene.sfx_instruction || '';
+    return `
+      <div class="scene-card fade-in" id="scene-card-${i}" style="flex-direction:column;gap:8px;padding:12px">
+        <div style="display:flex;gap:10px;align-items:flex-start">
+          ${imgUrl
+            ? `<div style="width:44px;height:76px;border-radius:8px;overflow:hidden;flex-shrink:0;position:relative">
+                 <img src="${imgUrl}" style="width:100%;height:100%;object-fit:cover"/>
+                 <div style="position:absolute;inset:0;background:${color}22"></div>
+               </div>`
+            : `<div class="scene-icon" style="background:${color}18;color:${color};flex-shrink:0">${SCENE_ICONS[scene.type] || '📹'}</div>`
+          }
+          <div style="flex:1;min-width:0">
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;flex-wrap:wrap">
+              <span style="font-size:10px;font-weight:700;color:${color};text-transform:uppercase">${scene.type}</span>
+              <span style="font-size:10px;color:#323238">${start}s – ${end}s</span>
+              ${imgUrl ? '<span style="font-size:9px;background:rgba(34,197,94,.15);color:#22c55e;padding:1px 5px;border-radius:4px;font-weight:700">IA ✓</span>' : ''}
+              ${scene.clipProvider === 'kling' ? '<span style="font-size:9px;background:rgba(139,92,246,.15);color:#8b5cf6;padding:1px 5px;border-radius:4px;font-weight:700">⚡ Kling</span>' : ''}
+              ${scene.clipProvider === 'runway' ? '<span style="font-size:9px;background:rgba(249,115,22,.15);color:#f97316;padding:1px 5px;border-radius:4px;font-weight:700">🎬 Runway</span>' : ''}
+              ${scene.clipProvider === 'client' ? '<span style="font-size:9px;background:rgba(34,197,94,.15);color:#22c55e;padding:1px 5px;border-radius:4px;font-weight:700">📁 Cliente</span>' : ''}
+            </div>
+            <div style="font-size:13px;font-weight:700;color:#e2e8f0;margin-bottom:3px">${scene.title || ''}</div>
+            <div style="font-size:11px;color:#94a3b8;line-height:1.5;font-style:italic">"${(scene.voiceover || scene.subtitle || '').substring(0, 100)}${(scene.voiceover||'').length > 100 ? '…' : ''}"</div>
+          </div>
+        </div>
+        <!-- Editable visual prompt -->
+        <div style="border-top:1px solid #1c1c22;padding-top:8px">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
+            <span style="font-size:9px;font-weight:700;color:#06b6d4;text-transform:uppercase;letter-spacing:.8px">🎬 Visual Prompt</span>
+            <span style="font-size:9px;color:#323238">editable antes de renderizar</span>
+          </div>
+          <textarea
+            id="vp-${i}"
+            rows="2"
+            oninput="updateVisualPrompt(${i}, this.value)"
+            placeholder="Describe el visual de esta escena..."
+            style="width:100%;background:#060608;border:1px solid #1c1c22;border-radius:6px;color:#94a3b8;font-size:10px;padding:6px 8px;resize:vertical;font-family:inherit;line-height:1.4;box-sizing:border-box"
+          >${escapeHtml(vp)}</textarea>
+          ${sfx ? `<div style="margin-top:4px;font-size:9px;color:#484850">🔊 SFX: ${sfx.substring(0,60)}…</div>` : ''}
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function updateVisualPrompt(i, val) {
+  if (S.scenes[i]) S.scenes[i].visual_prompt = val;
+}
+
+function escapeHtml(s) {
+  return (s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+async function previewSceneImages() {
+  if (!S.scenes.length) return notify('Genera el guion primero', 'error');
+
+  const btn = document.getElementById('preview-images-btn');
+  btn.disabled = true;
+  btn.textContent = '⏳ Generando...';
+
+  // Get client brand
+  let brand = null;
+  if (S.clientId) {
+    try { const r = await fetch(`/api/clients/${S.clientId}`); const d = await r.json(); if (d.success) brand = d.brand; } catch(_) {}
+  }
+  const imgStyleEl = document.querySelector('.pill[data-group="imgstyle"].active');
+  const imageStyle = imgStyleEl?.dataset.value || 'photorealistic';
+  const toneEl = document.querySelector('.pill[data-group="tone"].active');
+  const tone = toneEl?.dataset.value || 'Inspirador';
+
+  try {
+    const r = await fetch('/api/generate/images', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ scenes: S.scenes, brand, tone, format: S.format, imageStyle }),
+    });
+    const d = await r.json();
+    if (!d.success) throw new Error(d.error);
+
+    S.sceneImageUrls = d.images.map(img => img.url);
+    renderStoryboard(S.scenes, S.sceneImageUrls);
+    notify(`✅ ${d.images.filter(i => i.url).length} imágenes IA generadas`, 'success');
+  } catch(e) {
+    notify(`Error: ${e.message}`, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '🎨 Preview imágenes';
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// RENDER
+// ═══════════════════════════════════════════════════════════════
+async function startRender() {
+  const script = document.getElementById('script-editor').value.trim();
+  if (!script) return notify('Guion vacío', 'error');
+
+  const clientId = S.clientId;
+  if (!clientId) return notify('Selecciona un cliente primero', 'error');
+
+  // ElevenLabs key is stored server-side — don't block on localStorage
+  const apiKey = localStorage.getItem('elevenlabs_api_key') || null;
+
+  const moodEl = document.querySelector('.pill[data-group="mood"].active');
+  const toneEl2 = document.querySelector('.pill[data-group="tone"].active');
+  const imgStyleEl = document.querySelector('.pill[data-group="imgstyle"].active');
+
+  // Collect uploaded video filenames (safe-sanitized, same as server saves them)
+  const clientVideoFiles = uploadedAssets
+    .filter(a => a.ext && /mp4|mov|webm|avi/i.test(a.ext.replace('.', '')))
+    .map(a => a.originalName.replace(/[^a-zA-Z0-9._-]/g, '_'));
+
+  const body = {
+    clientId,
+    script,
+    scenes:          S.scenes.length ? S.scenes : null,
+    musicMood:       moodEl?.dataset.value || S.mood,
+    sfxOnCta:        S.sfxOnCta,
+    apiKey,
+    format:          S.format,
+    durationSeconds: S.duration,
+    audioMode:       S.audioMode,
+    transition:      document.getElementById('transition-select').value,
+    tone:            toneEl2?.dataset.value || S.tone,
+    imageStyle:      imgStyleEl?.dataset.value || S.imageStyle,
+    mashupMode:      currentMashupMode,
+    clientVideos:    clientVideoFiles,
+  };
+
+  const btn = document.getElementById('render-btn');
+  btn.disabled = true;
+
+  try {
+    const r = await fetch('/api/render', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+    const data = await r.json();
+    if (!data.success) throw new Error(data.error);
+
+    S.jobId = data.jobId;
+    goToStep(3);
+    initPipelineSteps();
+    listenProgress(data.jobId);
+  } catch (e) {
+    btn.disabled = false;
+    notify(`Error: ${e.message}`, 'error');
+  }
+}
+
+function initPipelineSteps() {
+  const steps = [
+    { label: '🎙 Narración ElevenLabs', key: 'narration' },
+    { label: '🎵 Música generativa', key: 'music' },
+    { label: '⚡ SFX de impacto', key: 'sfx' },
+    { label: '🖼 Preparando assets', key: 'assets' },
+    { label: '🎬 Renderizando video', key: 'render' },
+  ];
+  document.getElementById('pipeline-steps').innerHTML = steps.map((s, i) => `
+    <div id="ps-${i}" style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;background:#060608;opacity:.4;transition:all .3s">
+      <div id="ps-icon-${i}" style="width:22px;height:22px;border-radius:50%;border:1.5px solid #1c1c22;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;font-weight:700;color:#323238">
+        ${i+1}
+      </div>
+      <div style="font-size:13px;color:#484850;font-weight:500">${s.label}</div>
+    </div>
+  `).join('');
+}
+
+function listenProgress(jobId) {
+  const es = new EventSource(`/api/render/progress/${jobId}`);
+
+  es.addEventListener('progress', e => {
+    const d = JSON.parse(e.data);
+    const pct = d.percent || 0;
+    document.getElementById('progress-fill').style.width = pct + '%';
+    document.getElementById('progress-label').textContent = d.label || '';
+    document.getElementById('progress-pct').textContent = pct + '%';
+
+    // Highlight current pipeline step
+    const step = (d.step || 1) - 1;
+    for (let i = 0; i < 5; i++) {
+      const el = document.getElementById(`ps-${i}`);
+      const icon = document.getElementById(`ps-icon-${i}`);
+      if (!el) continue;
+      if (i < step) {
+        el.style.opacity = '1';
+        el.style.background = 'rgba(34,197,94,.05)';
+        icon.style.background = 'rgba(34,197,94,.15)';
+        icon.style.color = '#22c55e';
+        icon.style.border = '1.5px solid rgba(34,197,94,.3)';
+        icon.textContent = '✓';
+      } else if (i === step) {
+        el.style.opacity = '1';
+        el.style.background = 'rgba(249,115,22,.05)';
+        icon.style.background = 'rgba(249,115,22,.15)';
+        icon.style.color = '#f97316';
+        icon.style.border = '1.5px solid rgba(249,115,22,.4)';
+        icon.innerHTML = '<span class="spin">↻</span>';
+      }
+    }
+  });
+
+  es.addEventListener('done', e => {
+    es.close();
+    const d = JSON.parse(e.data);
+    S.videoUrl = d.videoUrl;
+
+    // Complete all pipeline steps
+    for (let i = 0; i < 5; i++) {
+      const el = document.getElementById(`ps-${i}`);
+      const icon = document.getElementById(`ps-icon-${i}`);
+      if (!el) continue;
+      el.style.opacity = '1';
+      el.style.background = 'rgba(34,197,94,.05)';
+      if (icon) { icon.style.background = 'rgba(34,197,94,.15)'; icon.style.color = '#22c55e'; icon.textContent = '✓'; }
+    }
+
+    document.getElementById('progress-fill').style.width = '100%';
+    document.getElementById('progress-label').textContent = '🎉 ¡Video listo!';
+    document.getElementById('progress-pct').textContent = '100%';
+
+    // Show result
+    setTimeout(() => {
+      document.getElementById('render-result').classList.remove('hidden');
+      const video = document.getElementById('result-video');
+      video.src = d.videoUrl;
+      const dl = document.getElementById('download-btn');
+      dl.href = d.videoUrl;
+      dl.download = d.filename || 'video.mp4';
+      document.getElementById('result-meta').textContent = `${d.format || S.format} · ${d.durationSeconds || S.duration}s`;
+
+      document.getElementById('render-btn').disabled = false;
+    }, 400);
+  });
+
+  es.addEventListener('error', e => {
+    // Ignore native EventSource connection drops (e.data is null) — render still running server-side
+    if (!e.data) return;
+    es.close();
+    let msg = 'Error desconocido';
+    try { msg = JSON.parse(e.data).message; } catch (_) {}
+    document.getElementById('render-error').classList.remove('hidden');
+    document.getElementById('error-message').textContent = msg;
+    document.getElementById('render-btn').disabled = false;
+  });
+
+  es.onerror = () => {
+    // Connection dropped but render may still be running — poll library every 10s
+    es.close();
+    document.getElementById('progress-label').textContent = '⏳ Render en progreso (conexión reconectando...)';
+    const poll = setInterval(async () => {
+      try {
+        const r = await fetch('/api/library');
+        const d = await r.json();
+        if (d.videos?.length) {
+          const latest = d.videos[0];
+          // Check if this video was created in the last 5 minutes
+          const age = Date.now() - new Date(latest.createdAt).getTime();
+          if (age < 300000) {
+            clearInterval(poll);
+            S.videoUrl = latest.videoUrl;
+            document.getElementById('render-result').classList.remove('hidden');
+            document.getElementById('result-video').src = latest.videoUrl;
+            const dl = document.getElementById('download-btn');
+            dl.href = latest.videoUrl;
+            dl.download = latest.filename;
+            document.getElementById('result-meta').textContent = `${latest.format || S.format} · ${latest.durationSeconds || S.duration}s`;
+            document.getElementById('progress-fill').style.width = '100%';
+            document.getElementById('progress-label').textContent = '🎉 ¡Video listo! (detectado en librería)';
+            document.getElementById('progress-pct').textContent = '100%';
+            document.getElementById('render-btn').disabled = false;
+          }
+        }
+      } catch (_) {}
+    }, 8000);
+    // Stop polling after 10 minutes
+    setTimeout(() => clearInterval(poll), 600000);
+  };
+}
+
+function shareVideo(platform, url) {
+  const videoUrl = url || S.videoUrl;
+  if (!videoUrl) return;
+  fetch('/api/send-channel', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ platform, videoUrl }),
+  }).then(() => notify(`Video enviado a ${platform}`, 'success'));
+}
+
+// ═══════════════════════════════════════════════════════════════
+// CLIENTS
+// ═══════════════════════════════════════════════════════════════
+async function loadClients() {
+  try {
+    const r = await fetch('/api/clients');
+    const d = await r.json();
+    if (!d.success) return;
+
+    const sel = document.getElementById('client-select');
+    sel.innerHTML = '<option value="">— Selecciona cliente existente —</option>' +
+      d.clients.map(c => `<option value="${c.clientId}">${c.displayName}</option>`).join('');
+  } catch (_) {}
+}
+
+function onClientSelect() {
+  S.clientId = document.getElementById('client-select').value || null;
+  document.getElementById('brand-preview').classList.add('hidden');
+  S.scrapedBrand = null;
+}
+
+async function loadClientsTab() {
+  const grid = document.getElementById('clients-grid');
+  grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:48px;color:#323238"><span class="spin">⏳</span></div>';
+
+  try {
+    const r = await fetch('/api/clients');
+    const d = await r.json();
+    if (!d.success) return;
+
+    document.getElementById('clients-count').textContent = `${d.clients.length} clientes`;
+
+    if (d.clients.length === 0) {
+      grid.innerHTML = `
+        <div style="grid-column:1/-1;text-align:center;padding:64px;color:#323238">
+          <div style="font-size:40px;margin-bottom:12px">🎯</div>
+          <div style="font-size:15px;font-weight:600;margin-bottom:6px">Sin clientes aún</div>
+          <div style="font-size:13px;margin-bottom:20px">Crea tu primer cliente para empezar</div>
+          <button class="btn btn-primary" onclick="openNewClientModal()">+ Crear cliente</button>
+        </div>`;
+      return;
+    }
+
+    grid.innerHTML = d.clients.map(c => `
+      <div class="card" style="padding:16px;cursor:pointer;transition:.2s" onmouseover="this.style.borderColor='#f9731640'" onmouseout="this.style.borderColor='#1c1c22'">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+          ${c.logoUrl
+            ? `<img src="${c.logoUrl}" class="logo-preview" onerror="this.style.display='none'"/>`
+            : `<div style="width:48px;height:48px;border-radius:10px;background:${c.primaryColor};display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;color:#fff">${c.displayName[0]}</div>`}
+          <div style="flex:1;min-width:0">
+            <div style="font-size:14px;font-weight:700;color:#e2e8f0" class="truncate">${c.displayName}</div>
+            <div style="font-size:11px;color:#484850;margin-top:2px" class="truncate">${c.website || c.clientId}</div>
+          </div>
+          <div style="width:12px;height:12px;border-radius:50%;background:${c.primaryColor};flex-shrink:0"></div>
+        </div>
+        <div style="display:flex;gap:6px">
+          <button class="btn btn-xs btn-secondary" onclick="selectClientAndCreate('${c.clientId}')">✨ Crear video</button>
+          <button class="btn btn-xs btn-ghost" onclick="openClientLogoUpload('${c.clientId}')">🖼 Logo</button>
+        </div>
+      </div>
+    `).join('');
+  } catch (e) {
+    grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;color:#f87171;padding:32px">${e.message}</div>`;
+  }
+}
+
+function selectClientAndCreate(id) {
+  S.clientId = id;
+  document.getElementById('client-select').value = id;
+  showTab('create');
+}
+
+// ─── New client modal ─────────────────────────────────────────
+let _logoFile = null;
+
+function openNewClientModal() {
+  _logoFile = null;
+  document.getElementById('nc-logo-preview').style.display = 'none';
+  document.getElementById('nc-logo-preview').textContent = '';
+  document.getElementById('new-client-modal').classList.remove('hidden');
+}
+
+function onLogoSelect(e) {
+  _logoFile = e.target.files[0];
+  if (_logoFile) {
+    const prev = document.getElementById('nc-logo-preview');
+    prev.style.display = 'block';
+    prev.textContent = '✓ ' + _logoFile.name;
+  }
+}
+
+async function createClient() {
+  const id   = document.getElementById('nc-id').value.trim();
+  const name = document.getElementById('nc-name').value.trim();
+  if (!id || !name) return notify('ID y nombre son requeridos', 'error');
+
+  try {
+    const r = await fetch('/api/clients', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        clientId: id,
+        displayName: name,
+        website: document.getElementById('nc-url').value,
+        colors: {
+          primary: document.getElementById('nc-primary').value,
+          secondary: document.getElementById('nc-secondary').value,
+        },
+      }),
+    });
+    const d = await r.json();
+    if (!d.success) throw new Error(d.error);
+
+    // Upload logo if present
+    if (_logoFile) {
+      const form = new FormData();
+      form.append('logo', _logoFile);
+      await fetch(`/api/clients/${id}/upload-logo`, { method: 'POST', body: form });
+    }
+
+    notify(`✅ Cliente ${name} creado`, 'success');
+    closeModal('new-client-modal');
+    loadClients();
+    loadClientsTab();
+    S.clientId = id;
+    document.getElementById('client-select').value = id;
+  } catch (e) {
+    notify(e.message, 'error');
+  }
+}
+
+async function openClientLogoUpload(clientId) {
+  const input = document.createElement('input');
+  input.type = 'file'; input.accept = 'image/*';
+  input.onchange = async e => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const form = new FormData();
+    form.append('logo', file);
+    const r = await fetch(`/api/clients/${clientId}/upload-logo`, { method: 'POST', body: form });
+    const d = await r.json();
+    if (d.success) { notify('Logo actualizado ✓', 'success'); loadClientsTab(); }
+    else notify(d.error, 'error');
+  };
+  input.click();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// LIBRARY
+// ═══════════════════════════════════════════════════════════════
+async function loadLibrary() {
+  const grid = document.getElementById('library-grid');
+  grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:48px;color:#323238"><span class="spin">⏳</span></div>';
+
+  try {
+    const r = await fetch('/api/library');
+    const d = await r.json();
+
+    document.getElementById('library-count').textContent = `${d.videos?.length || 0} videos renderizados`;
+
+    if (!d.videos?.length) {
+      grid.innerHTML = `
+        <div style="grid-column:1/-1;text-align:center;padding:64px;color:#323238">
+          <div style="font-size:40px;margin-bottom:12px">🎬</div>
+          <div style="font-size:15px;font-weight:600;margin-bottom:6px">Sin videos aún</div>
+          <div style="font-size:13px">Crea tu primer video en la pestaña Crear</div>
+        </div>`;
+      return;
+    }
+
+    grid.innerHTML = d.videos.map(v => {
+      const isPortrait = v.format === '9:16';
+      const isSquare   = v.format === '1:1';
+      const date = new Date(v.createdAt).toLocaleDateString('es-CL', { day: '2-digit', month: 'short' });
+      const mb   = (v.size / 1024 / 1024).toFixed(1);
+      return `
+        <div class="video-card" onclick="previewVideo('${v.videoUrl}','${v.filename}','${v.clientId}')">
+          <div class="${isPortrait ? 'video-thumb' : isSquare ? 'video-thumb square' : 'video-thumb landscape'}" style="cursor:pointer">
+            <video src="${v.videoUrl}" muted preload="metadata" style="width:100%;height:100%;object-fit:cover"></video>
+            <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.4);opacity:0;transition:.2s" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0">
+              <div style="width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;font-size:18px">▶</div>
+            </div>
+          </div>
+          <div style="padding:12px">
+            <div style="font-size:13px;font-weight:700;color:#e2e8f0;margin-bottom:4px" class="truncate">${v.clientId}</div>
+            <div style="display:flex;justify-content:space-between;font-size:11px;color:#484850">
+              <span>${v.format || '9:16'} · ${v.durationSeconds || 21}s</span>
+              <span>${date} · ${mb}MB</span>
+            </div>
+            ${v.musicMood ? `<div style="margin-top:6px"><span class="vibe-tag" style="background:rgba(249,115,22,.1);color:#f97316">${v.musicMood}</span></div>` : ''}
+          </div>
+        </div>`;
+    }).join('');
+  } catch (e) {
+    grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;color:#f87171;padding:32px">${e.message}</div>`;
+  }
+}
+
+function previewVideo(url, filename, clientId) {
+  document.getElementById('preview-modal-video').src = url;
+  document.getElementById('preview-modal-title').textContent = filename || clientId;
+  const dl = document.getElementById('preview-download');
+  dl.href = url;
+  dl.download = filename;
+  document.getElementById('video-preview-modal').classList.remove('hidden');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// ASSETS UPLOAD — with drag & drop + preview thumbnails
+// ═══════════════════════════════════════════════════════════════
+const uploadedAssets = [];
+
+// Make ANY element a drop target by calling enableDropZone(el, handler)
+function enableDropZone(el, onFiles) {
+  el.addEventListener('dragover',  e => { e.preventDefault(); el.classList.add('dragover'); });
+  el.addEventListener('dragleave', () => el.classList.remove('dragover'));
+  el.addEventListener('drop', e => { e.preventDefault(); el.classList.remove('dragover'); onFiles([...e.dataTransfer.files]); });
+}
+
+// Enable drag & drop on whole page (bonus)
+document.addEventListener('dragover', e => e.preventDefault());
+document.addEventListener('drop', e => {
+  e.preventDefault();
+  const files = [...e.dataTransfer.files];
+  if (files.length) { handleAssets(files); notify(`📁 ${files.length} archivos detectados`, 'info'); }
+});
+
+function onAssetDrop(e) {
+  e.preventDefault();
+  document.getElementById('asset-dropzone').classList.remove('dragover');
+  handleAssets([...e.dataTransfer.files]);
+}
+
+function onAssetSelect(e) { handleAssets([...e.target.files]); }
+
+async function handleAssets(files) {
+  const MAX_VIDEO = 10, MAX_IMAGE = 15;
+  const videos = files.filter(f => f.type.startsWith('video/'));
+  const images = files.filter(f => f.type.startsWith('image/'));
+  const allowed = [...videos.slice(0, MAX_VIDEO), ...images.slice(0, MAX_IMAGE)];
+  if (!allowed.length) return notify('Solo se aceptan video e imagen (MP4, MOV, JPG, PNG)', 'error');
+
+  // Show instant local previews
+  const list = document.getElementById('asset-list');
+  const previews = allowed.map(f => {
+    const item = document.createElement('div');
+    item.style.cssText = 'display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid #1c1c22';
+    const isVid = f.type.startsWith('video/');
+    const isImg = f.type.startsWith('image/');
+    let thumbHtml = `<div style="width:36px;height:36px;border-radius:6px;background:#1c1c22;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">${isVid ? '🎬' : '🖼'}</div>`;
+    if (isImg) {
+      const url = URL.createObjectURL(f);
+      thumbHtml = `<img src="${url}" style="width:36px;height:36px;border-radius:6px;object-fit:cover;flex-shrink:0" onload="URL.revokeObjectURL(this.src)"/>`;
+    }
+    item.innerHTML = `${thumbHtml}<div style="flex:1;min-width:0"><div style="font-size:11px;color:#e2e8f0;font-weight:600" class="truncate">${f.name}</div><div style="font-size:10px;color:#484850">${(f.size/1024).toFixed(0)}KB · <span class="spin" style="font-size:10px">⏳</span></div></div>`;
+    list.appendChild(item);
+    return { file: f, item };
+  });
+
+  const form = new FormData();
+  if (S.clientId) form.append('clientId', S.clientId);
+  allowed.forEach(f => form.append('files', f));
+
+  try {
+    const r = await fetch('/api/assets/upload', { method: 'POST', body: form });
+    const d = await r.json();
+    if (d.success) {
+      previews.forEach(({ file, item }, idx) => {
+        const info = d.files[idx];
+        if (info) {
+          uploadedAssets.push(info);
+          const status = item.querySelector('div > div:nth-child(2)');
+          if (status) status.innerHTML = `<span style="color:#22c55e">✓ Subido</span> · <a href="${info.url}" target="_blank" style="color:#f97316;font-size:10px">ver</a>`;
+        }
+      });
+      notify(`✅ ${d.files.length} archivos subidos`, 'success');
+    }
+  } catch (e) {
+    previews.forEach(({ item }) => {
+      const status = item.querySelector('div > div:nth-child(2)');
+      if (status) status.innerHTML = `<span style="color:#f87171">Error</span>`;
+    });
+    notify('Error subiendo: ' + e.message, 'error');
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// GOOGLE DRIVE — server-side OAuth (no JS Origins needed)
+// ═══════════════════════════════════════════════════════════════
+let _driveAuthed = false;
+
+async function saveDriveClientId() {
+  const clientId = document.getElementById('key-GOOGLE_CLIENT_ID')?.value?.trim();
+  const clientSecret = document.getElementById('key-GOOGLE_CLIENT_SECRET')?.value?.trim();
+  const keys = {};
+  if (clientId) { localStorage.setItem('google_client_id', clientId); keys['GOOGLE_CLIENT_ID'] = clientId; }
+  if (clientSecret) keys['GOOGLE_CLIENT_SECRET'] = clientSecret;
+  if (Object.keys(keys).length > 0) {
+    await fetch('/api/keys', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(keys) });
+    notify('Google Drive configurado ✓', 'success');
+  }
+}
+
+function openDrivePicker() {
+  // Server-side OAuth — opens a popup to Google, then server stores the token
+  const popup = window.open('/api/auth/google', 'google-drive-auth', 'width=500,height=600,popup=yes');
+  if (!popup) { notify('Permite popups para autenticar Google Drive', 'error'); return; }
+
+  // Listen for postMessage from the OAuth callback
+  const listener = async (e) => {
+    if (e.origin !== window.location.origin) return;
+    if (e.data?.type !== 'drive_auth') return;
+    window.removeEventListener('message', listener);
+    _driveAuthed = true;
+    notify('✅ Google Drive conectado', 'success');
+    // Auto-open the file picker
+    showDriveFilePicker();
+  };
+  window.addEventListener('message', listener);
+  // Also poll for popup close (fallback)
+  const check = setInterval(() => {
+    if (popup.closed) {
+      clearInterval(check);
+      window.removeEventListener('message', listener);
+      if (!_driveAuthed) {
+        // Try to load files anyway (token may be set server-side)
+        showDriveFilePicker();
+      }
+    }
+  }, 1000);
+}
+
+let _driveCurrentPageToken = null;
+let _driveAllFiles = [];
+let _driveFolderStack = []; // [{ id: null, name: 'Mi Drive' }, { id: 'abc', name: 'Carpeta' }, ...]
+
+async function showDriveFilePicker(options = {}) {
+  const searchQuery = typeof options === 'string' ? options : (options.searchQuery || '');
+  const folderId = options.folderId || (_driveFolderStack.length > 0 ? _driveFolderStack[_driveFolderStack.length - 1].id : '');
+  const params = { mimeFilter: 'all', pageSize: '50' };
+  if (searchQuery) params.q = searchQuery;
+  if (folderId) params.folderId = folderId;
+
+  const r = await fetch('/api/drive/files?' + new URLSearchParams(params)).catch(() => null);
+  if (!r?.ok) {
+    const err = await r?.json().catch(() => ({}));
+    notify('Drive: ' + (err?.error || 'Autoriza primero'), 'error');
+    return;
+  }
+  const data = await r.json();
+  if (!data.success) { notify('Drive: ' + (data.error || 'Error'), 'error'); return; }
+
+  _driveCurrentPageToken = data.nextPageToken || null;
+  _driveAllFiles = data.files || [];
+
+  // If navigating into a folder, push to stack
+  if (options.folderId && options.folderName) {
+    _driveFolderStack.push({ id: options.folderId, name: options.folderName });
+  } else if (!options.folderId && typeof options !== 'string') {
+    // Reset to root
+    _driveFolderStack = [];
+  }
+
+  _renderDrivePicker(_driveAllFiles, _driveCurrentPageToken, searchQuery);
+}
+
+function _driveBreadcrumb() {
+  const parts = [{ id: null, name: '📁 Mi Drive' }, ..._driveFolderStack];
+  return parts.map((p, i) => {
+    const isLast = i === parts.length - 1;
+    if (isLast) return `<span style="color:#e2e8f0;font-weight:700">${escapeHtml(p.name)}</span>`;
+    return `<span style="color:#6366f1;cursor:pointer;font-weight:600" onclick="_driveNavigateToLevel(${i})">${escapeHtml(p.name)}</span>`;
+  }).join(' <span style="color:#484850">›</span> ');
+}
+
+function _driveNavigateToLevel(levelIndex) {
+  // Trim stack to this level (levelIndex 0 = root, so slice to 0 = empty stack)
+  _driveFolderStack = _driveFolderStack.slice(0, levelIndex > 0 ? levelIndex - 1 : 0);
+  const targetFolderId = _driveFolderStack.length > 0 ? _driveFolderStack[_driveFolderStack.length - 1].id : '';
+  const params = { mimeFilter: 'all' };
+  if (targetFolderId) params.folderId = targetFolderId;
+  fetch('/api/drive/files?' + new URLSearchParams(params)).then(r => r.json()).then(data => {
+    if (data?.success) {
+      _driveAllFiles = data.files || [];
+      _driveCurrentPageToken = data.nextPageToken || null;
+      _renderDrivePicker(_driveAllFiles, _driveCurrentPageToken, '');
+    }
+  }).catch(e => notify('Drive error: ' + e.message, 'error'));
+}
+
+function _renderDrivePicker(files, nextPageToken, currentSearch = '') {
+  const existing = document.getElementById('drive-picker-modal');
+  if (existing) existing.remove();
+
+  const inSubfolder = _driveFolderStack.length > 0;
+  const currentFolderId = inSubfolder ? _driveFolderStack[_driveFolderStack.length - 1].id : '';
+
+  const modal = document.createElement('div');
+  modal.id = 'drive-picker-modal';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.88);display:flex;align-items:center;justify-content:center;z-index:300;backdrop-filter:blur(10px)';
+  modal.innerHTML = `
+    <div style="background:#0d0d12;border:1px solid #1e1e26;border-radius:20px;width:720px;max-width:96vw;max-height:88vh;display:flex;flex-direction:column;overflow:hidden">
+      <div style="padding:18px 20px;border-bottom:1px solid #1c1c22;display:flex;align-items:center;justify-content:space-between">
+        <div style="display:flex;align-items:center;gap:10px">
+          <div style="width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,#4285f4,#34a853);display:flex;align-items:center;justify-content:center;font-size:15px">📁</div>
+          <div>
+            <div style="font-size:15px;font-weight:800;color:#e2e8f0">Google Drive</div>
+            <div style="font-size:10px;color:#484850" id="drive-file-count">${files.length} elementos</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <select id="drive-mime-filter" onchange="_driveApplyFilter()" style="background:#1c1c22;border:1px solid #323238;border-radius:6px;color:#94a3b8;font-size:11px;padding:4px 8px">
+            <option value="all">Todos</option>
+            <option value="video">Solo video</option>
+            <option value="image">Solo imagen</option>
+          </select>
+          <button onclick="document.getElementById('drive-picker-modal').remove()" style="background:none;border:none;color:#484850;font-size:20px;cursor:pointer">✕</button>
+        </div>
+      </div>
+      <!-- Breadcrumb + Back navigation -->
+      <div style="padding:8px 16px;border-bottom:1px solid #1c1c22;display:flex;align-items:center;gap:8px;background:#060608">
+        ${inSubfolder ? `<button onclick="_driveFolderBack()" style="background:#1c1c22;border:none;border-radius:6px;color:#94a3b8;font-size:11px;font-weight:600;padding:4px 10px;cursor:pointer;flex-shrink:0">← Atrás</button>` : ''}
+        <div style="font-size:11px;display:flex;align-items:center;gap:4px;flex-wrap:wrap">${_driveBreadcrumb()}</div>
+      </div>
+      <div style="padding:10px 16px;border-bottom:1px solid #1c1c22">
+        <div style="position:relative">
+          <input id="drive-search-input" placeholder="🔍 Buscar por nombre..." value="${currentSearch}" oninput="_driveDebouncedSearch(this.value)" style="background:#060608;border:1px solid #1c1c22;border-radius:8px;color:#e2e8f0;padding:8px 36px 8px 12px;font-size:13px;width:100%;outline:none"/>
+          <div id="drive-search-spinner" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);display:none;font-size:12px">⏳</div>
+        </div>
+      </div>
+      <div id="drive-file-grid" style="padding:14px;overflow-y:auto;flex:1;display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px">
+        ${_renderDriveItems(files)}
+      </div>
+      ${nextPageToken ? `<div style="padding:10px 16px;border-top:1px solid #1c1c22;text-align:center"><button onclick="_driveLoadMore()" class="btn btn-ghost btn-sm" style="width:200px">⬇ Cargar más</button></div>` : ''}
+      <div style="padding:12px 20px;border-top:1px solid #1c1c22;display:flex;gap:10px;align-items:center">
+        <button onclick="_driveSelectAll()" style="background:#1c1c22;border:none;border-radius:6px;color:#94a3b8;font-size:11px;padding:4px 10px;cursor:pointer">Seleccionar todo</button>
+        <span id="drive-selected-count" style="font-size:11px;color:#484850;flex:1">0 seleccionados</span>
+        <button onclick="importDriveFiles()" class="btn btn-primary btn-sm">⬇ Importar</button>
+        <button onclick="document.getElementById('drive-picker-modal').remove()" class="btn btn-secondary btn-sm">Cancelar</button>
+      </div>
+    </div>`;
+  document.body.appendChild(modal);
+
+  // Lazy-load thumbnails
+  _driveLazyLoadThumbnails();
+}
+
+function _driveFolderBack() {
+  _driveFolderStack.pop();
+  const targetFolderId = _driveFolderStack.length > 0 ? _driveFolderStack[_driveFolderStack.length - 1].id : '';
+  // Re-fetch without pushing to stack (showDriveFilePicker won't push because folderId/folderName are not passed as push-opts)
+  const params = { mimeFilter: 'all' };
+  if (targetFolderId) params.folderId = targetFolderId;
+  fetch('/api/drive/files?' + new URLSearchParams(params)).then(r => r.json()).then(data => {
+    if (data?.success) {
+      _driveAllFiles = data.files || [];
+      _driveCurrentPageToken = data.nextPageToken || null;
+      _renderDrivePicker(_driveAllFiles, _driveCurrentPageToken, '');
+    }
+  }).catch(e => notify('Drive error: ' + e.message, 'error'));
+}
+
+function _renderDriveItems(files) {
+  return files.map(f => {
+    const isFolder = f.isFolder || f.mimeType === 'application/vnd.google-apps.folder';
+    const isVid = f.mimeType?.includes('video');
+    const isImg = f.mimeType?.includes('image');
+    const icon = isFolder ? '📁' : isVid ? '🎬' : isImg ? '🖼' : '📄';
+    const ar = isVid ? '16/9' : '1/1';
+
+    if (isFolder) {
+      return `
+        <div style="display:flex;flex-direction:column;gap:4px;cursor:pointer" onclick="showDriveFilePicker({folderId:'${f.id}',folderName:'${escapeHtml(f.name).replace(/'/g,"\\'")}'})" title="Abrir carpeta">
+          <div style="width:100%;aspect-ratio:1/1;border-radius:8px;overflow:hidden;position:relative;background:linear-gradient(135deg,#1e3a5f,#1c2a4a);border:2px solid #2563eb33;display:flex;align-items:center;justify-content:center;transition:.15s;flex-direction:column;gap:4px" onmouseover="this.style.borderColor='#6366f1'" onmouseout="this.style.borderColor='#2563eb33'">
+            <div style="font-size:32px">📁</div>
+            <div style="font-size:9px;color:#60a5fa;font-weight:700;text-transform:uppercase;letter-spacing:.05em">Carpeta</div>
+          </div>
+          <div style="font-size:9px;color:#94a3b8;text-align:center;line-height:1.3;word-break:break-word">${escapeHtml((f.name||'').length > 24 ? f.name.substring(0,22)+'…' : f.name)}</div>
+        </div>`;
+    }
+
+    return `
+      <label style="display:flex;flex-direction:column;gap:4px;cursor:pointer" data-filename="${(f.name||'').toLowerCase()}">
+        <div class="drive-thumb" data-id="${f.id}" data-has-thumb="${f.hasThumbnail ? '1' : '0'}" style="width:100%;aspect-ratio:${ar};border-radius:8px;overflow:hidden;position:relative;background:#0a0a0e;border:2px solid transparent;cursor:pointer;transition:.15s" onclick="_driveToggle(this)">
+          <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:24px" class="drive-thumb-placeholder">${icon}</div>
+          <div class="drive-check" style="position:absolute;top:5px;right:5px;width:18px;height:18px;border-radius:50%;background:#1c1c22;border:1.5px solid #323238;display:flex;align-items:center;justify-content:center;font-size:9px;opacity:.7">○</div>
+          <input type="checkbox" data-id="${f.id}" data-name="${escapeHtml(f.name)}" style="display:none"/>
+        </div>
+        <div style="font-size:9px;color:#94a3b8;text-align:center;line-height:1.3;word-break:break-word">${escapeHtml((f.name||'').length > 24 ? f.name.substring(0,22)+'…' : f.name)}</div>
+      </label>`;
+  }).join('');
+}
+
+let _driveSearchTimer = null;
+function _driveCurrentFolderId() {
+  return _driveFolderStack.length > 0 ? _driveFolderStack[_driveFolderStack.length - 1].id : '';
+}
+
+function _driveDebouncedSearch(q) {
+  clearTimeout(_driveSearchTimer);
+  document.getElementById('drive-search-spinner').style.display = 'block';
+  _driveSearchTimer = setTimeout(async () => {
+    const mimeFilter = document.getElementById('drive-mime-filter')?.value || 'all';
+    const folderId = _driveCurrentFolderId();
+    const params = { mimeFilter };
+    if (q) params.q = q;
+    if (folderId) params.folderId = folderId;
+    const r = await fetch('/api/drive/files?' + new URLSearchParams(params)).catch(() => null);
+    const data = await r?.json().catch(() => ({}));
+    document.getElementById('drive-search-spinner').style.display = 'none';
+    if (data?.success) {
+      _driveAllFiles = data.files || [];
+      _driveCurrentPageToken = data.nextPageToken || null;
+      const grid = document.getElementById('drive-file-grid');
+      if (grid) {
+        grid.innerHTML = _renderDriveItems(_driveAllFiles);
+        document.getElementById('drive-file-count').textContent = `${_driveAllFiles.length} elementos`;
+        _driveLazyLoadThumbnails();
+      }
+    }
+  }, 500);
+}
+
+async function _driveApplyFilter() {
+  const q = document.getElementById('drive-search-input')?.value || '';
+  const mimeFilter = document.getElementById('drive-mime-filter')?.value || 'all';
+  const folderId = _driveCurrentFolderId();
+  const params = { mimeFilter };
+  if (q) params.q = q;
+  if (folderId) params.folderId = folderId;
+  const r = await fetch('/api/drive/files?' + new URLSearchParams(params)).catch(() => null);
+  const data = await r?.json().catch(() => ({}));
+  if (data?.success) {
+    _driveAllFiles = data.files || [];
+    _driveCurrentPageToken = data.nextPageToken || null;
+    const grid = document.getElementById('drive-file-grid');
+    if (grid) { grid.innerHTML = _renderDriveItems(_driveAllFiles); _driveLazyLoadThumbnails(); }
+  }
+}
+
+async function _driveLoadMore() {
+  if (!_driveCurrentPageToken) return;
+  const q = document.getElementById('drive-search-input')?.value || '';
+  const mimeFilter = document.getElementById('drive-mime-filter')?.value || 'all';
+  const folderId = _driveCurrentFolderId();
+  const params = { mimeFilter, pageToken: _driveCurrentPageToken };
+  if (q) params.q = q;
+  if (folderId) params.folderId = folderId;
+  const r = await fetch('/api/drive/files?' + new URLSearchParams(params)).catch(() => null);
+  const data = await r?.json().catch(() => ({}));
+  if (data?.success) {
+    _driveAllFiles = [..._driveAllFiles, ...(data.files || [])];
+    _driveCurrentPageToken = data.nextPageToken || null;
+    const grid = document.getElementById('drive-file-grid');
+    if (grid) {
+      grid.insertAdjacentHTML('beforeend', _renderDriveItems(data.files || []));
+      document.getElementById('drive-file-count').textContent = `${_driveAllFiles.length} elementos`;
+      _driveLazyLoadThumbnails();
+    }
+  }
+}
+
+function _driveLazyLoadThumbnails() {
+  const thumbs = document.querySelectorAll('.drive-thumb[data-has-thumb="1"]');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const el = entry.target;
+        const fileId = el.dataset.id;
+        if (fileId && !el.dataset.thumbLoaded) {
+          el.dataset.thumbLoaded = '1';
+          const img = document.createElement('img');
+          img.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:6px;opacity:0;transition:opacity .3s';
+          img.src = `/api/drive/thumbnail/${fileId}`;
+          img.onload = () => { img.style.opacity = '1'; el.querySelector('.drive-thumb-placeholder').style.display = 'none'; };
+          img.onerror = () => {};
+          el.prepend(img);
+          observer.unobserve(el);
+        }
+      }
+    });
+  }, { rootMargin: '100px' });
+  thumbs.forEach(t => observer.observe(t));
+}
+
+function _driveToggle(thumbEl) {
+  const isSelected = thumbEl.style.borderColor === 'rgb(249, 115, 22)';
+  thumbEl.style.borderColor = isSelected ? 'transparent' : '#f97316';
+  thumbEl.style.background = isSelected ? '#0a0a0e' : 'rgba(249,115,22,.06)';
+  const check = thumbEl.querySelector('.drive-check');
+  if (check) { check.textContent = isSelected ? '○' : '✓'; check.style.background = isSelected ? '#1c1c22' : '#f97316'; check.style.borderColor = isSelected ? '#323238' : '#f97316'; check.style.color = isSelected ? '#323238' : '#fff'; check.style.opacity = isSelected ? '.7' : '1'; }
+  const cb = thumbEl.querySelector('input[type=checkbox]');
+  if (cb) cb.checked = !isSelected;
+  const count = document.querySelectorAll('#drive-file-grid input[type=checkbox]:checked').length;
+  const el = document.getElementById('drive-selected-count');
+  if (el) el.textContent = `${count} seleccionados`;
+}
+
+function _driveSelectAll() {
+  document.querySelectorAll('#drive-file-grid .drive-thumb').forEach(t => {
+    const cb = t.querySelector('input[type=checkbox]');
+    if (cb && !cb.checked) _driveToggle(t);
+  });
+}
+
+async function importDriveFiles() {
+  const checked = [...document.querySelectorAll('#drive-file-grid input[type=checkbox]:checked')];
+  if (!checked.length) { notify('Selecciona al menos un archivo', 'error'); return; }
+
+  document.getElementById('drive-picker-modal').remove();
+  notify(`⏳ Importando ${checked.length} archivos...`, 'info');
+
+  for (const cb of checked) {
+    try {
+      const r = await fetch(`/api/drive/download/${cb.dataset.id}?name=${encodeURIComponent(cb.dataset.name)}&clientId=${S.clientId || ''}`);
+      const d = await r.json();
+      if (d.success) {
+        uploadedAssets.push(d);
+        const list = document.getElementById('asset-list');
+        const item = document.createElement('div');
+        item.style.cssText = 'display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid #1c1c22';
+        item.innerHTML = `<div style="width:36px;height:36px;border-radius:6px;background:#1c1c22;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">📁</div><div style="flex:1;min-width:0"><div style="font-size:11px;color:#e2e8f0;font-weight:600" class="truncate">${d.originalName}</div><div style="font-size:10px;color:#22c55e">✓ Importado de Drive</div></div>`;
+        list.appendChild(item);
+      }
+    } catch(e) { notify(`Error: ${cb.dataset.name} — ${e.message}`, 'error'); }
+  }
+  notify(`✅ ${checked.length} archivos importados de Drive`, 'success');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// AI REFINE CHAT
+// ═══════════════════════════════════════════════════════════════
+async function sendAiMessage() {
+  const input = document.getElementById('ai-input');
+  const msg = input.value.trim();
+  if (!msg) return;
+  input.value = '';
+
+  const chat = document.getElementById('ai-chat');
+
+  // User message
+  const userEl = document.createElement('div');
+  userEl.className = 'chat-msg chat-user';
+  userEl.textContent = msg;
+  chat.appendChild(userEl);
+  chat.scrollTop = chat.scrollHeight;
+
+  // Check if it's a script refinement
+  if (/guion|script|narr|texto|escena|corto|largo|urgente|inspirador|tono/.test(msg.toLowerCase())) {
+    const scriptEl = document.createElement('div');
+    scriptEl.className = 'chat-msg chat-ai';
+
+    const currentScript = document.getElementById('script-editor').value;
+    if (currentScript && S.script) {
+      // Apply simple tone change
+      const tone = /urgente/.test(msg.toLowerCase()) ? 'Urgente'
+                 : /inspirador/.test(msg.toLowerCase()) ? 'Inspirador'
+                 : /profesional/.test(msg.toLowerCase()) ? 'Profesional'
+                 : null;
+      if (tone) {
+        const prompt = document.getElementById('prompt-input').value;
+        const data = await fetch('/api/script/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ prompt, brandName: S.clientId || 'la marca', tone, durationSeconds: S.duration, rrss: S.rrss }),
+        }).then(r => r.json());
+
+        if (data.success) {
+          document.getElementById('script-editor').value = data.script;
+          S.script = data.script;
+          S.scenes = data.scenes;
+          renderStoryboard(data.scenes);
+          updateWordCount();
+          scriptEl.textContent = `✅ Regeneré el guion con tono ${tone}. Revísalo en el editor.`;
+        }
+      } else {
+        scriptEl.textContent = '💡 Para cambiar el tono dime: "tono urgente", "tono inspirador" o "tono profesional".';
+      }
+    } else {
+      scriptEl.textContent = '💡 Genera el guion primero (Paso 1 → Generar Guion).';
+    }
+    chat.appendChild(scriptEl);
+    chat.scrollTop = chat.scrollHeight;
+    return;
+  }
+
+  // Brand refinement
+  if (!S.clientId) {
+    const aiEl = document.createElement('div');
+    aiEl.className = 'chat-msg chat-ai';
+    aiEl.textContent = '⚠️ Selecciona un cliente primero para modificar su marca.';
+    chat.appendChild(aiEl);
+    return;
+  }
+
+  const r = await fetch('/api/ai-refine', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ prompt: msg, clientId: S.clientId }),
+  });
+  const d = await r.json();
+  const aiEl = document.createElement('div');
+  aiEl.className = 'chat-msg chat-ai';
+  aiEl.textContent = d.message || 'Actualizado ✓';
+  chat.appendChild(aiEl);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+function quickPrompt(text) {
+  document.getElementById('ai-input').value = text;
+  sendAiMessage();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// API KEY
+// ═══════════════════════════════════════════════════════════════
+function openApiKeyModal() {
+  const stored = localStorage.getItem('elevenlabs_api_key') || '';
+  document.getElementById('api-key-input').value = stored;
+  document.getElementById('api-key-modal').classList.remove('hidden');
+}
+
+function saveApiKey() {
+  const key = document.getElementById('api-key-input').value.trim();
+  if (key) localStorage.setItem('elevenlabs_api_key', key);
+  else localStorage.removeItem('elevenlabs_api_key');
+  checkApiKey();
+  closeModal('api-key-modal');
+  notify(key ? '✅ API Key guardada' : 'API Key borrada', key ? 'success' : 'info');
+}
+
+function checkApiKey() {
+  // localStorage key OR server-stored key (checked on load) — both count
+  const key = localStorage.getItem('elevenlabs_api_key');
+  const dot = document.getElementById('api-key-dot');
+  const label = document.getElementById('api-key-label');
+  const status = document.getElementById('el-status');
+  // Check server key async
+  fetch('/api/keys').then(r=>r.json()).then(d => {
+    const hasKey = key || d.keys?.ELEVENLABS_API_KEY;
+    if (hasKey) {
+      dot.style.background = '#22c55e';
+      label.style.color = '#22c55e';
+      label.textContent = 'ElevenLabs ✓';
+      if (status) { status.textContent = 'ACTIVE'; status.style.color = '#22c55e'; }
+    } else {
+      dot.style.background = '#484850';
+      label.style.color = '#484850';
+      label.textContent = 'ElevenLabs';
+      if (status) { status.textContent = 'NO KEY'; status.style.color = '#484850'; }
+    }
+  }).catch(() => {
+    if (key) { dot.style.background = '#22c55e'; label.style.color = '#22c55e'; label.textContent = 'ElevenLabs ✓'; }
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
+// MODALS
+// ═══════════════════════════════════════════════════════════════
+function closeModal(id) {
+  document.getElementById(id).classList.add('hidden');
+}
+
+// Close on overlay click
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+  overlay.addEventListener('click', e => {
+    if (e.target === overlay) overlay.classList.add('hidden');
+  });
+});
+
+// ═══════════════════════════════════════════════════════════════
+// NOTIFICATIONS
+// ═══════════════════════════════════════════════════════════════
+function notify(msg, type = 'info') {
+  const el = document.createElement('div');
+  el.className = `notif ${type}`;
+  el.textContent = msg;
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 3500);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════
+// AI KEYS MODAL
+// ═══════════════════════════════════════════════════════════════
+async function openAiKeysModal() {
+  // Load masked keys + status from server
+  try {
+    const r = await fetch('/api/keys');
+    const d = await r.json();
+    if (d.success) {
+      const serverFieldMap = {
+        OPENAI_API_KEY:       'key-OPENAI_API_KEY',
+        GEMINI_API_KEY:       'key-GEMINI_API_KEY',
+        KLING_ACCESS_KEY:     'key-KLING_ACCESS_KEY',
+        KLING_SECRET_KEY:     'key-KLING_SECRET_KEY',
+        STABILITY_API_KEY:    'key-STABILITY_API_KEY',
+        FAL_API_KEY:          'key-FAL_API_KEY',
+        REPLICATE_API_KEY:    'key-REPLICATE_API_KEY',
+        RUNWAY_API_KEY:       'key-RUNWAY_API_KEY',
+        PEXELS_API_KEY:       'key-PEXELS_API_KEY',
+        PIXABAY_API_KEY:      'key-PIXABAY_API_KEY',
+        GOOGLE_CLIENT_ID:     'key-GOOGLE_CLIENT_ID',
+        GOOGLE_CLIENT_SECRET: 'key-GOOGLE_CLIENT_SECRET',
+      };
+      for (const [k, fieldId] of Object.entries(serverFieldMap)) {
+        const el = document.getElementById(fieldId);
+        if (el && d.keys[k]) el.placeholder = d.keys[k];
+      }
+
+      // Render API status dashboard
+      const dash = document.getElementById('api-status-dashboard');
+      if (dash && d.status) {
+        const entries = Object.entries(d.status);
+        const activeCount = entries.filter(([,v]) => v.active).length;
+        dash.innerHTML = `
+          <div style="font-size:10px;font-weight:700;color:#94a3b8;margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px">
+            Estado de APIs — ${activeCount}/${entries.length} activas
+          </div>
+          <div style="display:flex;flex-wrap:wrap;gap:6px">
+            ${entries.map(([key, info]) => `
+              <div style="display:flex;align-items:center;gap:5px;padding:4px 8px;border-radius:20px;background:${info.active ? info.color + '18' : '#1c1c22'};border:1px solid ${info.active ? info.color + '44' : '#323238'}">
+                <div style="width:6px;height:6px;border-radius:50%;background:${info.active ? info.color : '#484850'};flex-shrink:0${info.active ? ';box-shadow:0 0 6px ' + info.color : ''}"></div>
+                <span style="font-size:10px;color:${info.active ? '#e2e8f0' : '#484850'};font-weight:${info.active ? '600' : '400'}">${info.name}</span>
+              </div>`).join('')}
+          </div>`;
+      }
+    }
+  } catch(_) {}
+
+  // ElevenLabs from localStorage
+  const elKey = localStorage.getItem('elevenlabs_api_key');
+  const elField = document.getElementById('key-ELEVENLABS_API_KEY_SETTINGS');
+  if (elField && elKey) elField.placeholder = elKey.substring(0,6) + '••••' + elKey.slice(-4);
+
+  // Google Drive client ID
+  const driveField = document.getElementById('key-GOOGLE_CLIENT_ID');
+  const savedClientId = localStorage.getItem('google_client_id');
+  if (driveField && savedClientId) driveField.value = savedClientId;
+
+  document.getElementById('ai-keys-modal').classList.remove('hidden');
+}
+
+async function saveAllApiKeys() {
+  const serverKeys = {};
+  const serverFields = {
+    'key-OPENAI_API_KEY':    'OPENAI_API_KEY',
+    'key-GEMINI_API_KEY':    'GEMINI_API_KEY',
+    'key-KLING_ACCESS_KEY':  'KLING_ACCESS_KEY',
+    'key-KLING_SECRET_KEY':  'KLING_SECRET_KEY',
+    'key-STABILITY_API_KEY': 'STABILITY_API_KEY',
+    'key-FAL_API_KEY':       'FAL_API_KEY',
+    'key-REPLICATE_API_KEY': 'REPLICATE_API_KEY',
+    'key-RUNWAY_API_KEY':    'RUNWAY_API_KEY',
+    'key-PEXELS_API_KEY':    'PEXELS_API_KEY',
+    'key-PIXABAY_API_KEY':   'PIXABAY_API_KEY',
+  };
+  for (const [fieldId, keyName] of Object.entries(serverFields)) {
+    const val = document.getElementById(fieldId)?.value?.trim();
+    if (val) serverKeys[keyName] = val;
+  }
+
+  // ElevenLabs → localStorage
+  const elVal = document.getElementById('key-ELEVENLABS_API_KEY_SETTINGS')?.value?.trim();
+  if (elVal) { localStorage.setItem('elevenlabs_api_key', elVal); checkApiKey(); }
+
+  // Google Client ID + Secret → server
+  const driveVal = document.getElementById('key-GOOGLE_CLIENT_ID')?.value?.trim();
+  if (driveVal) { localStorage.setItem('google_client_id', driveVal); serverKeys['GOOGLE_CLIENT_ID'] = driveVal; }
+  const driveSecretVal = document.getElementById('key-GOOGLE_CLIENT_SECRET')?.value?.trim();
+  if (driveSecretVal) serverKeys['GOOGLE_CLIENT_SECRET'] = driveSecretVal;
+
+  if (Object.keys(serverKeys).length > 0) {
+    try {
+      await fetch('/api/keys', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(serverKeys),
+      });
+    } catch(e) { notify('Error guardando keys: ' + e.message, 'error'); return; }
+  }
+
+  const total = Object.keys(serverKeys).length + (elVal ? 1 : 0);
+  closeModal('ai-keys-modal');
+  notify(`✅ ${total} configuraciones guardadas`, 'success');
+
+  // Update integration status
+  updateIntegrationStatus();
+}
+
+function updateIntegrationStatus() {
+  const keys = ['OPENAI_API_KEY','STABILITY_API_KEY','FAL_API_KEY','REPLICATE_API_KEY','RUNWAY_API_KEY'];
+  const hasAny = keys.some(k => {
+    const el = document.getElementById(`key-${k}`);
+    return el && (el.value.trim() || el.placeholder !== '...');
+  });
+  // Could show a badge on the IA button — for now just update ElevenLabs indicator
+  checkApiKey();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// CONTENT GRID (GEMINI DIRECTOR)
+// ═══════════════════════════════════════════════════════════════
+async function generateContentGrid() {
+  if (!G.clientId) return notify('Selecciona un cliente primero', 'error');
+  const posts   = parseInt(document.getElementById('grid-posts').value) || 0;
+  const stories = parseInt(document.getElementById('grid-stories').value) || 0;
+  const banners = parseInt(document.getElementById('grid-banners').value) || 0;
+  const total   = posts + stories + banners;
+  if (total === 0) return notify('Selecciona al menos 1 pieza', 'error');
+  if (total > 15) return notify('Máximo 15 piezas por generación', 'error');
+
+  const btn = document.getElementById('grid-gen-btn');
+  btn.disabled = true;
+  btn.textContent = `⏳ Planificando ${total} piezas con Gemini...`;
+
+  const resultsEl = document.getElementById('grid-results');
+  resultsEl.innerHTML = `<div style="text-align:center;padding:24px;color:#484850"><span class="spin">⏳</span><div style="margin-top:8px;font-size:12px">Gemini diseñando ${total} composiciones únicas...</div></div>`;
+
+  const contentTypes = [
+    ...Array(posts).fill('post'),
+    ...Array(stories).fill('story'),
+    ...Array(banners).fill('banner'),
+  ];
+
+  try {
+    const r = await fetch('/api/render/content-grid', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        clientId: G.clientId,
+        contentTypes,
+        context: document.getElementById('grid-context').value.trim(),
+        tone: document.querySelector('.pill[data-group="gbg"].active')?.dataset?.value === 'dark' ? 'Profesional' : 'Inspirador',
+        creativity: 80,
+      }),
+    });
+    const d = await r.json();
+    if (!d.success) throw new Error(d.error);
+
+    // Show grid
+    resultsEl.innerHTML = `
+      <div style="font-size:11px;font-weight:700;color:#e2e8f0;margin-bottom:10px">✅ ${d.items.length} piezas únicas generadas por Gemini</div>
+      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px">
+        ${d.items.map(item => item.url ? `
+          <div style="background:#0a0a0e;border-radius:8px;overflow:hidden;border:1px solid #1c1c22;cursor:pointer;transition:.2s" onmouseover="this.style.borderColor='#f97316'" onmouseout="this.style.borderColor='#1c1c22'">
+            <img src="${item.url}" style="width:100%;aspect-ratio:${item.plan?.type === 'banner' ? '16/9' : item.plan?.type === 'story' ? '9/16' : '1/1'};object-fit:cover"/>
+            <div style="padding:8px">
+              <div style="font-size:10px;font-weight:700;color:#f97316;text-transform:uppercase">${item.plan?.layout || item.label}</div>
+              <div style="font-size:9px;color:#484850;margin-top:2px">${item.plan?.copy_angle || ''}</div>
+              <a href="${item.url}" download="grid-${item.label}.png" class="btn btn-xs btn-ghost" style="margin-top:6px;font-size:9px;width:100%;justify-content:center">⬇ Descargar</a>
+            </div>
+          </div>` : `
+          <div style="background:#0a0a0e;border-radius:8px;padding:12px;border:1px solid #f8717133;display:flex;align-items:center;justify-content:center;aspect-ratio:1/1;font-size:10px;color:#f87171;text-align:center">${item.label}<br/>Error al renderizar</div>`
+        ).join('')}
+      </div>`;
+    notify(`✅ Content grid listo — ${d.items.filter(i => i.url).length}/${d.items.length} piezas`, 'success');
+  } catch(e) {
+    resultsEl.innerHTML = `<div style="color:#f87171;font-size:12px;padding:8px">${e.message}</div>`;
+    notify('Error: ' + e.message, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '🧠 Generar Content Grid con Gemini';
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// GRÁFICAS TAB
+// ═══════════════════════════════════════════════════════════════
+const G = {
+  type: 'post',
+  bgStyle: 'dark',
+  clientId: null,
+};
+
+let _graphicPreviewTimer = null;
+
+async function initGraphicsTab() {
+  try {
+    const r = await fetch('/api/clients');
+    const d = await r.json();
+    if (!d.success) return;
+    const sel = document.getElementById('graphic-client-select');
+    sel.innerHTML = '<option value="">— Selecciona cliente —</option>' +
+      d.clients.map(c => `<option value="${c.clientId}">${c.displayName}</option>`).join('');
+    if (S.clientId) { sel.value = S.clientId; G.clientId = S.clientId; }
+  } catch (_) {}
+  // Apply initial type layout (hides image-row for default post type, etc.)
+  const activeTypeBtn = document.querySelector('#graphic-type-grid .trans-btn.active');
+  setGraphicType(G.type, activeTypeBtn);
+}
+
+function onGraphicClientChange(clientId) {
+  G.clientId = clientId || null;
+}
+
+function setGraphicType(type, el) {
+  G.type = type;
+  document.querySelectorAll('#graphic-type-grid .trans-btn').forEach(b => b.classList.remove('active'));
+  if (el) el.classList.add('active');
+
+  const isStats    = type === 'stats';
+  const isQuote    = type === 'quote';
+  const isCarousel = type === 'carousel';
+  const isBanner   = type === 'banner';
+  const isProduct  = type === 'product';
+
+  document.getElementById('graphic-stats-row').classList.toggle('hidden', !isStats);
+  document.getElementById('graphic-quote-row').classList.toggle('hidden', !isQuote);
+  document.getElementById('graphic-carousel-section').classList.toggle('hidden', !isCarousel);
+  document.getElementById('graphic-image-row').classList.toggle('hidden', !(isBanner || isProduct));
+
+  const wrap = document.getElementById('graphic-preview-wrap');
+  const label = document.getElementById('graphic-size-label');
+  if (type === 'story' || type === 'carousel') {
+    wrap.style.aspectRatio = '9/16'; label.textContent = '1080 × 1920';
+  } else if (type === 'banner') {
+    wrap.style.aspectRatio = '16/9'; label.textContent = '1920 × 1080';
+  } else {
+    wrap.style.aspectRatio = '1/1'; label.textContent = '1080 × 1080';
+  }
+
+  // Init carousel slides on first switch
+  if (isCarousel) {
+    const list = document.getElementById('carousel-slides-list');
+    if (list && list.children.length === 0) { addCarouselSlide(); addCarouselSlide(); }
+  }
+}
+
+function autoGraphicPreview() {
+  clearTimeout(_graphicPreviewTimer);
+  _graphicPreviewTimer = setTimeout(() => {
+    const headline = document.getElementById('graphic-headline').value.trim();
+    const sub = document.getElementById('graphic-sub').value.trim();
+    const wrap = document.getElementById('graphic-preview-img-wrap');
+    if (headline) {
+      wrap.innerHTML = `
+        <div style="width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;background:linear-gradient(135deg,#1a1a2e,#16213e)">
+          <div style="font-size:10px;color:#f97316;font-weight:700;text-transform:uppercase;letter-spacing:2px;margin-bottom:8px">${G.type.toUpperCase()}</div>
+          <div style="font-size:clamp(14px,4vw,22px);font-weight:900;color:#f8fafc;line-height:1.2;margin-bottom:8px">${escapeHtml(headline)}</div>
+          ${sub ? `<div style="font-size:12px;color:#94a3b8">${escapeHtml(sub)}</div>` : ''}
+          <div style="margin-top:16px;font-size:10px;color:#323238">Presiona "Generar Gráfica" para el render final</div>
+        </div>`;
+    }
+  }, 400);
+}
+
+function addCarouselSlide() {
+  const list = document.getElementById('carousel-slides-list');
+  const idx = list.children.length;
+  const item = document.createElement('div');
+  item.style.cssText = 'display:flex;gap:6px;align-items:center';
+  item.innerHTML = `
+    <div style="font-size:10px;color:#484850;width:18px;flex-shrink:0;text-align:center">${idx + 1}</div>
+    <input class="input" placeholder="Titular ${idx + 1}" style="flex:1;font-size:12px" data-slide-field="headline"/>
+    <input class="input" placeholder="Subtítulo" style="flex:1;font-size:12px" data-slide-field="sub"/>
+    <button onclick="this.parentElement.remove();_renumberSlides()" style="background:none;border:none;color:#484850;cursor:pointer;font-size:14px;flex-shrink:0;padding:4px">✕</button>`;
+  list.appendChild(item);
+}
+
+function _renumberSlides() {
+  const list = document.getElementById('carousel-slides-list');
+  [...list.children].forEach((item, i) => {
+    const numEl = item.querySelector('div');
+    if (numEl) numEl.textContent = i + 1;
+  });
+}
+
+function _getGraphicProps() {
+  const bgStyle    = document.querySelector('.pill[data-group="gbg"].active')?.dataset?.value || 'dark';
+  const headline   = document.getElementById('graphic-headline').value.trim();
+  const sub        = document.getElementById('graphic-sub').value.trim();
+  const body       = document.getElementById('graphic-body').value.trim();
+  const cta        = document.getElementById('graphic-cta').value.trim();
+  const imageUrl   = document.getElementById('graphic-imageurl').value.trim();
+  const quoteAuthor = document.getElementById('graphic-author').value.trim();
+
+  const stats = [];
+  for (let i = 0; i < 3; i++) {
+    const icon  = document.getElementById(`stat${i}-icon`)?.value?.trim();
+    const val   = document.getElementById(`stat${i}-val`)?.value?.trim();
+    const lbl   = document.getElementById(`stat${i}-label`)?.value?.trim();
+    if (val || lbl) stats.push({ icon: icon || '📊', value: val || '', label: lbl || '' });
+  }
+
+  const carouselSlides = [];
+  if (G.type === 'carousel') {
+    document.querySelectorAll('#carousel-slides-list > div').forEach(item => {
+      const h = item.querySelector('[data-slide-field="headline"]')?.value?.trim() || '';
+      const s = item.querySelector('[data-slide-field="sub"]')?.value?.trim() || '';
+      if (h) carouselSlides.push({ headline: h, subheadline: s });
+    });
+  }
+
+  return { type: G.type, bgStyle, headline, subheadline: sub, body, cta, stats, quoteAuthor, imageUrl, carouselSlides };
+}
+
+async function generateGraphic() {
+  if (!G.clientId) return notify('Selecciona un cliente primero', 'error');
+  const headline = document.getElementById('graphic-headline').value.trim();
+  if (!headline) return notify('Escribe un titular para la gráfica', 'error');
+
+  const btn = document.getElementById('graphic-gen-btn');
+  btn.disabled = true;
+  btn.textContent = '⏳ Renderizando...';
+
+  const resultsEl = document.getElementById('graphic-results');
+  resultsEl.innerHTML = '<div style="text-align:center;padding:20px;color:#484850"><span class="spin">⏳</span> Generando con Remotion...</div>';
+
+  const props = _getGraphicProps();
+
+  try {
+    if (G.type === 'carousel') { await _generateCarousel(props); return; }
+
+    const r = await fetch('/api/render/graphic', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ clientId: G.clientId, ...props }),
+    });
+    const d = await r.json();
+    if (!d.success) throw new Error(d.error || 'Error al renderizar');
+
+    const wrap = document.getElementById('graphic-preview-img-wrap');
+    wrap.innerHTML = `<img src="${d.url}" style="width:100%;height:100%;object-fit:contain;border-radius:8px" alt="Gráfica"/>`;
+
+    const sizeLabel = document.getElementById('graphic-size-label').textContent;
+    resultsEl.innerHTML = `
+      <div style="background:#0a0a0e;border:1px solid #22c55e33;border-radius:10px;padding:12px;display:flex;align-items:center;justify-content:space-between;gap:10px">
+        <div>
+          <div style="font-size:12px;font-weight:700;color:#22c55e">✓ Gráfica lista</div>
+          <div style="font-size:10px;color:#484850;margin-top:2px">${props.type.toUpperCase()} · PNG · ${sizeLabel}</div>
+        </div>
+        <a href="${d.url}" download="grafica-${props.type}.png" class="btn btn-xs btn-primary">⬇ Descargar</a>
+      </div>`;
+    notify('✅ Gráfica generada', 'success');
+  } catch (e) {
+    resultsEl.innerHTML = `<div style="color:#f87171;font-size:12px;padding:8px">${e.message}</div>`;
+    notify('Error: ' + e.message, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '🎨 Generar Gráfica';
+  }
+}
+
+async function _generateCarousel(props) {
+  const btn = document.getElementById('graphic-gen-btn');
+  const resultsEl = document.getElementById('graphic-results');
+
+  if (!props.carouselSlides?.length) {
+    resultsEl.innerHTML = '<div style="color:#f87171;font-size:12px">Agrega al menos 1 slide al carrusel</div>';
+    btn.disabled = false; btn.innerHTML = '🎨 Generar Gráfica'; return;
+  }
+
+  try {
+    const r = await fetch('/api/render/carousel', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ clientId: G.clientId, slides: props.carouselSlides, bgStyle: props.bgStyle }),
+    });
+    const d = await r.json();
+    if (!d.success) throw new Error(d.error || 'Error al renderizar carrusel');
+
+    const wrap = document.getElementById('graphic-preview-img-wrap');
+    if (d.urls?.length) {
+      wrap.innerHTML = `<img src="${d.urls[0]}" style="width:100%;height:100%;object-fit:contain;border-radius:8px" alt="Slide 1"/>`;
+    }
+
+    resultsEl.innerHTML = `
+      <div style="font-size:11px;font-weight:700;color:#e2e8f0;margin-bottom:8px">🎠 Carrusel — ${d.urls.length} slides</div>
+      <div style="display:flex;flex-direction:column;gap:6px">
+        ${d.urls.map((url, i) => `
+          <div style="display:flex;align-items:center;gap:8px;background:#0a0a0e;border:1px solid #1c1c22;border-radius:8px;padding:8px;cursor:pointer" onclick="document.getElementById('graphic-preview-img-wrap').innerHTML='<img src=\\'${url}\\' style=\\'width:100%;height:100%;object-fit:contain;border-radius:8px\\'/>'">
+            <img src="${url}" style="width:44px;height:44px;object-fit:cover;border-radius:6px;flex-shrink:0"/>
+            <span style="font-size:11px;color:#94a3b8;flex:1">Slide ${i + 1}</span>
+            <a href="${url}" download="slide-${i + 1}.png" class="btn btn-xs btn-ghost" onclick="event.stopPropagation()">⬇</a>
+          </div>`).join('')}
+      </div>`;
+    notify(`✅ Carrusel listo — ${d.urls.length} slides`, 'success');
+  } catch (e) {
+    resultsEl.innerHTML = `<div style="color:#f87171;font-size:12px;padding:8px">${e.message}</div>`;
+    notify('Error: ' + e.message, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '🎨 Generar Gráfica';
+  }
+}
+
+async function generateMassGraphics() {
+  if (!G.clientId) return notify('Selecciona un cliente primero', 'error');
+  const headline = document.getElementById('graphic-headline').value.trim();
+  if (!headline) return notify('Escribe un titular para el set', 'error');
+
+  const types = [...document.querySelectorAll('[data-mass]:checked')].map(el => el.value);
+  if (!types.length) return notify('Selecciona al menos un tipo de gráfica', 'error');
+
+  const btn = document.getElementById('mass-gen-btn');
+  btn.disabled = true;
+  btn.textContent = `⏳ Generando ${types.length} piezas...`;
+
+  const resultsEl = document.getElementById('graphic-results');
+  resultsEl.innerHTML = `<div style="text-align:center;padding:16px;color:#484850"><span class="spin">⏳</span> Generando set de ${types.length} piezas...</div>`;
+
+  const baseProps = _getGraphicProps();
+  const results = [];
+
+  for (let i = 0; i < types.length; i++) {
+    const type = types[i];
+    btn.textContent = `⏳ ${i + 1}/${types.length} — ${type}...`;
+    try {
+      const r = await fetch('/api/render/graphic', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ clientId: G.clientId, ...baseProps, type }),
+      });
+      const d = await r.json();
+      if (d.success) results.push({ type, url: d.url });
+    } catch (e) {
+      results.push({ type, error: e.message });
+    }
+  }
+
+  // Show all results
+  const wrap = document.getElementById('graphic-preview-img-wrap');
+  if (results[0]?.url) {
+    wrap.innerHTML = `<img src="${results[0].url}" style="width:100%;height:100%;object-fit:contain;border-radius:8px" alt="Set #1"/>`;
+  }
+
+  resultsEl.innerHTML = `
+    <div style="font-size:11px;font-weight:700;color:#e2e8f0;margin-bottom:8px">📦 Set listo — ${results.filter(r => r.url).length} / ${results.length} piezas</div>
+    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px">
+      ${results.map(r => r.url ? `
+        <div style="background:#0a0a0e;border:1px solid #1c1c22;border-radius:8px;overflow:hidden;cursor:pointer" onclick="document.getElementById('graphic-preview-img-wrap').innerHTML='<img src=\\'${r.url}\\' style=\\'width:100%;height:100%;object-fit:contain;border-radius:8px\\'/>'">
+          <img src="${r.url}" style="width:100%;aspect-ratio:1/1;object-fit:cover"/>
+          <div style="padding:6px;display:flex;justify-content:space-between;align-items:center">
+            <span style="font-size:10px;color:#94a3b8;font-weight:700;text-transform:uppercase">${r.type}</span>
+            <a href="${r.url}" download="grafica-${r.type}.png" class="btn btn-xs btn-ghost" onclick="event.stopPropagation()">⬇</a>
+          </div>
+        </div>` : `
+        <div style="background:#0a0a0e;border:1px solid #f8717133;border-radius:8px;padding:10px;display:flex;align-items:center;justify-content:center;aspect-ratio:1/1">
+          <div style="text-align:center;color:#f87171;font-size:10px">${r.type}<br/>Error</div>
+        </div>`
+      ).join('')}
+    </div>`;
+
+  notify(`✅ Set de ${results.filter(r => r.url).length} gráficas listo`, 'success');
+  btn.disabled = false;
+  btn.textContent = '📦 Generar set completo';
+}
+
+async function generateGraphicAnimated() {
+  if (!G.clientId) return notify('Selecciona un cliente primero', 'error');
+  const headline = document.getElementById('graphic-headline').value.trim();
+  if (!headline) return notify('Escribe un titular', 'error');
+
+  notify('⏳ Generando versión animada (MP4)...', 'info');
+  const props = _getGraphicProps();
+
+  try {
+    const r = await fetch('/api/render/graphic', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ clientId: G.clientId, ...props, animated: true }),
+    });
+    const d = await r.json();
+    if (!d.success) throw new Error(d.error);
+
+    const resultsEl = document.getElementById('graphic-results');
+    const sizeLabel = document.getElementById('graphic-size-label').textContent;
+    resultsEl.insertAdjacentHTML('beforeend', `
+      <div style="background:#0a0a0e;border:1px solid #f9731633;border-radius:10px;padding:12px;display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:8px">
+        <div>
+          <div style="font-size:12px;font-weight:700;color:#f97316">🎬 Versión animada</div>
+          <div style="font-size:10px;color:#484850;margin-top:2px">MP4 · ${sizeLabel}</div>
+        </div>
+        <a href="${d.url}" download="grafica-animada.mp4" class="btn btn-xs btn-primary">⬇ MP4</a>
+      </div>`);
+    notify('✅ Gráfica animada lista', 'success');
+  } catch (e) {
+    notify('Error animando: ' + e.message, 'error');
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// CLICK TO AD
+// ═══════════════════════════════════════════════════════════════
+const CTA = { clientId: null, scriptData: null, graphicProps: null, lastGraphicUrl: null };
+
+async function initClickToAdTab() {
+  try {
+    const r = await fetch('/api/clients');
+    const d = await r.json();
+    if (!d.success) return;
+    const sel = document.getElementById('cta-client-select');
+    sel.innerHTML = '<option value="">— Selecciona o deja vacío para scraping —</option>' +
+      d.clients.map(c => `<option value="${c.clientId}">${c.displayName}</option>`).join('');
+    if (S.clientId) { sel.value = S.clientId; CTA.clientId = S.clientId; }
+  } catch (_) {}
+}
+
+async function ctaScrapePreview() {
+  const url = document.getElementById('cta-url').value.trim();
+  if (!url) return notify('Ingresa una URL', 'error');
+  const btn = event.target;
+  btn.disabled = true; btn.textContent = '⏳';
+  try {
+    const r = await fetch('/api/brand/scrape', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ url }) });
+    const d = await r.json();
+    if (!d.success) throw new Error(d.error);
+    document.getElementById('cta-scraped-preview').style.display = 'block';
+    document.getElementById('cta-scraped-name').textContent = '✓ ' + d.brand.displayName;
+    document.getElementById('cta-scraped-desc').textContent = d.brand.description?.substring(0,120) || d.brand.website;
+    notify(`✅ ${d.brand.displayName} detectado`, 'success');
+  } catch (e) { notify(e.message, 'error'); }
+  finally { btn.disabled = false; btn.textContent = '🔍 Analizar'; }
+}
+
+function _ctaProgress(label, pct) {
+  document.getElementById('cta-status').style.display = 'block';
+  document.getElementById('cta-status-label').textContent = label;
+  document.getElementById('cta-progress-fill').style.width = pct + '%';
+}
+
+async function runClickToAd() {
+  const url     = document.getElementById('cta-url').value.trim();
+  const context = document.getElementById('cta-context').value.trim();
+  const clientId = document.getElementById('cta-client-select').value || null;
+
+  if (!url && !context && !clientId) return notify('Ingresa una URL o contexto', 'error');
+
+  const btn = document.getElementById('cta-gen-btn');
+  btn.disabled = true; btn.textContent = '⏳ Generando...';
+  document.getElementById('cta-script-result').style.display = 'none';
+  document.getElementById('cta-graphics-result').style.display = 'none';
+  document.getElementById('cta-edit-section').style.display = 'none';
+  document.getElementById('cta-variants-section').style.display = 'none';
+
+  try {
+    _ctaProgress('🌐 Analizando sitio web...', 15);
+    const r = await fetch('/api/click-to-ad', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        url: url || undefined,
+        context,
+        clientId: clientId || undefined,
+        format: '9:16',
+        durationSeconds: parseInt(document.getElementById('cta-duration').value),
+        tone: document.getElementById('cta-tone').value,
+        rrss: document.getElementById('cta-rrss').value,
+        mode: document.getElementById('cta-mode').value,
+      }),
+    });
+    const d = await r.json();
+    if (!d.success) throw new Error(d.error);
+
+    _ctaProgress('✅ Campaña lista', 100);
+    CTA.scriptData = d;
+    CTA.clientId = clientId;
+
+    // Show script
+    const scriptEl = document.getElementById('cta-script-result');
+    scriptEl.style.display = 'block';
+    document.getElementById('cta-script-text').textContent = d.script;
+    document.getElementById('cta-engine-badge').textContent = d.engine === 'gemini' ? '✨ Gemini Flash' : '⚡ PAS engine';
+
+    // Show graphics
+    if (d.graphics?.length) {
+      const gEl = document.getElementById('cta-graphics-result');
+      gEl.style.display = 'block';
+      const grid = document.getElementById('cta-graphics-grid');
+      grid.innerHTML = d.graphics.map(g => `
+        <div style="background:#0a0a0e;border-radius:8px;overflow:hidden;border:1px solid #1c1c22;cursor:pointer" onclick="document.getElementById('cta-graphics-grid').querySelectorAll('div').forEach(el=>el.style.borderColor='#1c1c22');this.style.borderColor='#f97316';CTA.lastGraphicUrl='${g.url}';CTA.graphicProps={type:'${g.type}',clientId:'${clientId}'}">
+          <img src="${g.url}" style="width:100%;aspect-ratio:1/1;object-fit:cover"/>
+          <div style="padding:6px;font-size:10px;color:#94a3b8;font-weight:700;text-transform:uppercase">${g.type}</div>
+        </div>`).join('');
+      CTA.lastGraphicUrl = d.graphics[0]?.url;
+    }
+
+    // Show edit section
+    document.getElementById('cta-edit-section').style.display = 'block';
+    notify(`✅ Campaña generada — ${d.engine === 'gemini' ? 'Gemini Flash' : 'PAS Engine'}`, 'success');
+  } catch (e) {
+    notify('Error: ' + e.message, 'error');
+    document.getElementById('cta-status').style.display = 'none';
+  } finally {
+    btn.disabled = false; btn.textContent = '⚡ Generar Campaña Completa';
+  }
+}
+
+function applyCtaScriptToCreate() {
+  if (!CTA.scriptData) return;
+  S.script = CTA.scriptData.script;
+  S.scenes = CTA.scriptData.scenes || [];
+  if (CTA.clientId) { S.clientId = CTA.clientId; document.getElementById('client-select').value = CTA.clientId; }
+  document.getElementById('script-editor').value = CTA.scriptData.script;
+  renderStoryboard(S.scenes);
+  updateWordCount();
+  showTab('create');
+  goToStep(2);
+  notify('✅ Guion aplicado. Revisa el storyboard.', 'success');
+}
+
+async function previewCtaVoice() {
+  if (!CTA.scriptData?.script) return;
+  const apiKey = localStorage.getItem('elevenlabs_api_key');
+  const r = await fetch('/api/tts-preview', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({ script: CTA.scriptData.script, apiKey }),
+  });
+  const d = await r.json();
+  if (d.success) {
+    const a = new Audio(d.url);
+    a.play();
+    notify('🔊 Reproduciendo preview...', 'info');
+  } else notify('TTS: ' + d.error, 'error');
+}
+
+async function generateCtaVariants() {
+  if (!CTA.scriptData || !CTA.clientId) return notify('Genera la campaña primero', 'error');
+  const sec = document.getElementById('cta-variants-section');
+  sec.style.display = 'block';
+  document.getElementById('cta-variants-grid').innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:20px;color:#484850"><span class="spin">⏳</span> Generando 10 estilos...</div>';
+
+  const headline = CTA.scriptData.scenes?.[1]?.title || CTA.scriptData.brandName || '';
+  const subheadline = CTA.scriptData.scenes?.[0]?.subtitle || '';
+
+  try {
+    const r = await fetch('/api/render/graphic-variants', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ clientId: CTA.clientId, headline, subheadline, count: 10 }),
+    });
+    const d = await r.json();
+    if (!d.success) throw new Error(d.error);
+
+    document.getElementById('cta-variants-grid').innerHTML = d.variants.map(v => v.url ? `
+      <div style="background:#0a0a0e;border-radius:8px;overflow:hidden;border:1px solid #1c1c22;cursor:pointer" onclick="this.style.borderColor='#f97316'">
+        <img src="${v.url}" style="width:100%;aspect-ratio:1/1;object-fit:cover"/>
+        <div style="padding:6px;display:flex;justify-content:space-between;align-items:center">
+          <span style="font-size:9px;color:#94a3b8;font-weight:700">${v.label}</span>
+          <a href="${v.url}" download class="btn btn-xs btn-ghost" style="padding:2px 6px;font-size:9px">⬇</a>
+        </div>
+      </div>` : `<div style="background:#0a0a0e;border-radius:8px;padding:10px;border:1px solid #f8717133;aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;font-size:10px;color:#f87171">${v.label}<br/>Error</div>`
+    ).join('');
+    notify(`✅ ${d.variants.filter(v => v.url).length} estilos generados`, 'success');
+  } catch (e) {
+    document.getElementById('cta-variants-grid').innerHTML = `<div style="grid-column:1/-1;color:#f87171;font-size:12px;padding:8px">${e.message}</div>`;
+    notify('Error: ' + e.message, 'error');
+  }
+}
+
+async function sendCtaEdit() {
+  const input = document.getElementById('cta-edit-input');
+  const msg = input.value.trim();
+  if (!msg) return;
+  input.value = '';
+
+  const chat = document.getElementById('cta-chat-messages');
+  const userEl = document.createElement('div');
+  userEl.style.cssText = 'font-size:11px;color:#e2e8f0;background:#1c1c22;border-radius:8px;padding:6px 10px;align-self:flex-end';
+  userEl.textContent = msg;
+  chat.appendChild(userEl);
+  chat.scrollTop = chat.scrollHeight;
+
+  const aiEl = document.createElement('div');
+  aiEl.style.cssText = 'font-size:11px;color:#f97316;background:rgba(249,115,22,.08);border-radius:8px;padding:6px 10px;align-self:flex-start';
+  aiEl.textContent = '⏳ Procesando...';
+  chat.appendChild(aiEl);
+
+  try {
+    // Determine current graphic props
+    const currentProps = CTA.graphicProps || { type: 'post', bgStyle: 'dark', headline: CTA.scriptData?.brandName || '' };
+    const r = await fetch('/api/ai-edit', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({
+        type: 'graphic',
+        clientId: CTA.clientId,
+        currentProps,
+        editPrompt: msg,
+      }),
+    });
+    const d = await r.json();
+    if (!d.success) throw new Error(d.error);
+
+    if (d.url) {
+      // Re-render complete — show new graphic
+      CTA.lastGraphicUrl = d.url;
+      CTA.graphicProps = d.updatedProps;
+      const grid = document.getElementById('cta-graphics-grid');
+      const newEl = document.createElement('div');
+      newEl.style.cssText = 'background:#0a0a0e;border-radius:8px;overflow:hidden;border:2px solid #f97316';
+      newEl.innerHTML = `<img src="${d.url}" style="width:100%;aspect-ratio:1/1;object-fit:cover"/><div style="padding:6px;display:flex;justify-content:space-between"><span style="font-size:10px;color:#f97316;font-weight:700">✓ Editado</span><a href="${d.url}" download class="btn btn-xs btn-ghost" style="font-size:9px">⬇</a></div>`;
+      grid.prepend(newEl);
+      aiEl.textContent = `✅ Gráfica actualizada — ${Object.keys(d.updatedProps).filter(k=>k!=='brand').map(k=>`${k}: ${JSON.stringify(d.updatedProps[k])}`).join(', ')}`;
+    } else {
+      aiEl.textContent = `✅ Cambios aplicados: ${JSON.stringify(d.updatedProps).substring(0,80)}`;
+    }
+  } catch (e) {
+    aiEl.textContent = '❌ ' + e.message;
+  }
+  chat.scrollTop = chat.scrollHeight;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SFX TOGGLE — init after DOM
+// ═══════════════════════════════════════════════════════════════
+document.getElementById('sfx-toggle').addEventListener('change', updateSfxToggle);
+</script>
+</body>
+</html>

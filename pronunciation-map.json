@@ -1,0 +1,24 @@
+{
+  "_comment": "Phonetic translation map for ElevenLabs TTS. Key = brand name as written, value = how ElevenLabs should pronounce it. Uses English spelling for English-sound brands inside Spanish scripts.",
+  "brands": {
+    "Hapee":    "Happy",
+    "hapee":    "Happy",
+    "HAPEE":    "Happy",
+    "Nike":     "Nai-kee",
+    "nike":     "Nai-kee",
+    "NIKE":     "Nai-kee",
+    "Adidas":   "Ah-dee-das",
+    "adidas":   "Ah-dee-das",
+    "Zara":     "Zah-rah",
+    "Ikea":     "Eye-kee-ah",
+    "IKEA":     "Eye-kee-ah",
+    "Xiaomi":   "Shao-mee",
+    "Huawei":   "Wah-way",
+    "Givenchy": "Zhee-von-shee",
+    "Moët":     "Mo-et",
+    "Hyundai":  "Hun-day",
+    "Porsche":  "Por-shuh",
+    "Audi":     "Ow-dee"
+  },
+  "_instructions": "Add new entries as: 'BrandName': 'foh-neh-tik-spelling'. The CLI script (create-client-video.mjs) will auto-replace all occurrences in the script before sending to ElevenLabs."
+}

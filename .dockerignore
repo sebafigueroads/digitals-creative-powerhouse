@@ -1,0 +1,11 @@
+node_modules
+.tmp
+public/renders
+public/assets/scenes
+public/graphics
+hapee-frames
+*.mp4
+*.log
+.git
+.env
+out

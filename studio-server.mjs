@@ -1157,7 +1157,8 @@ async function renderVideoFrames({
     imageFormat: "jpeg",
     jpegQuality: 90,
     inputProps: componentProps,
-    ...(BROWSER_EXECUTABLE ? { browserExecutable: BROWSER_EXECUTABLE } : {}),
+    chromiumOptions: { headless: true, disableWebSecurity: true },
+    chromiumOptions: { headless: true, disableWebSecurity: true }, ...(BROWSER_EXECUTABLE ? { browserExecutable: BROWSER_EXECUTABLE } : {}),
     onFrameUpdate: (frame) => {
       if (frame % 10 === 0 && onProgress) {
         const pct = Math.round(60 + (frame / durationFrames) * 28);
@@ -1560,22 +1561,52 @@ if (!fs.existsSync(GRAPHICS_DIR)) fs.mkdirSync(GRAPHICS_DIR, { recursive: true }
  * Generate an AI background image using OpenAI DALL-E 3.
  * Returns a URL to the generated image.
  */
+/**
+ * Generate an AI background image for graphics.
+ * Provider cascade: Gemini Imagen 3 → OpenAI DALL-E 3 → Pexels stock.
+ * Returns a local file path (saved under .tmp/bg-<timestamp>.jpg).
+ */
 async function generateAiBackground(brand, graphicType, apiKeys) {
-  if (!apiKeys.OPENAI_API_KEY) throw new Error("OpenAI key required for AI backgrounds");
-  const prompt = `High-impact ${graphicType} background for brand "${brand.displayName}". Abstract, cinematic, professional. Primary color: ${brand.colors?.primary || '#000'}. No text, no logos. Suitable as a dark overlay background. Style: modern, editorial, bold graphic design.`;
+  const prompt = `High-impact ${graphicType} background for brand "${brand.displayName}". Abstract, cinematic, professional. Primary color: ${brand.colors?.primary || '#000'}. No text, no logos. Suitable as dark overlay background. Style: modern, editorial, bold graphic design.`;
+  const destPath = path.join(__dirname, '.tmp', `bg-${Date.now()}.jpg`);
+  fs.mkdirSync(path.join(__dirname, '.tmp'), { recursive: true });
 
-  const res = await fetch("https://api.openai.com/v1/images/generations", {
-    method: "POST",
-    headers: { "Authorization": `Bearer ${apiKeys.OPENAI_API_KEY}`, "Content-Type": "application/json" },
-    body: JSON.stringify({ model: "dall-e-3", prompt, n: 1, size: "1024x1024", response_format: "url" }),
-  });
-  if (!res.ok) throw new Error(`OpenAI DALL-E bg ${res.status}: ${await res.text()}`);
-  const data = await res.json();
-  return data.data[0].url;
+  // 1. Gemini Imagen 3 (free tier supports it with billing enabled)
+  if (apiKeys.GEMINI_API_KEY) {
+    try {
+      console.log('  🎨 AI background: Gemini Imagen 3');
+      const buf = await generateWithGeminiImagen(prompt, 1080, 1080, apiKeys.GEMINI_API_KEY);
+      fs.writeFileSync(destPath, buf);
+      return destPath;
+    } catch (e) { console.warn('  ⚠️  Gemini bg failed:', e.message); }
+  }
+
+  // 2. OpenAI DALL-E 3
+  if (apiKeys.OPENAI_API_KEY) {
+    try {
+      console.log('  🎨 AI background: OpenAI DALL-E 3');
+      const url = await generateWithOpenAI(prompt, 1080, 1080, apiKeys.OPENAI_API_KEY);
+      await downloadImage(url, destPath);
+      return destPath;
+    } catch (e) { console.warn('  ⚠️  OpenAI bg failed:', e.message); }
+  }
+
+  // 3. Pexels stock (always free fallback)
+  if (apiKeys.PEXELS_API_KEY) {
+    try {
+      console.log('  🎨 AI background: Pexels stock');
+      const query = `${brand.displayName || graphicType} abstract professional`;
+      const url = await fetchPexelsPhoto(query, '1:1', apiKeys.PEXELS_API_KEY);
+      await downloadImage(url, destPath);
+      return destPath;
+    } catch (e) { console.warn('  ⚠️  Pexels bg failed:', e.message); }
+  }
+
+  throw new Error('No image provider available for AI background (needs GEMINI_API_KEY, OPENAI_API_KEY, or PEXELS_API_KEY)');
 }
 
 app.post('/api/render/graphic', async (req, res) => {
-  const { clientId, type = 'post', bgStyle = 'dark', headline, subheadline, body, cta, stats, quoteAuthor, imageUrl, animated = false, width: reqW, height: reqH, useAiBg = false } = req.body;
+  const { clientId, type = 'post', bgStyle = 'dark', headline, subheadline, body, cta, stats, quoteAuthor, imageUrl, animated = false, width: reqW, height: reqH, useAiBg } = req.body;
   if (!clientId || !headline) return res.status(400).json({ success: false, error: 'clientId and headline required' });
 
   const brandFile = path.join(CLIENTS_DIR, clientId, 'brand-identity.json');
@@ -1596,14 +1627,25 @@ app.post('/api/render/graphic', async (req, res) => {
   const width  = reqW || w;
   const height = reqH || h;
 
-  // Optionally generate an AI background
+  // Auto-enable AI background when any image provider key is available
+  const aiKeys = loadApiKeys();
+  const hasImageProvider = !!(aiKeys.GEMINI_API_KEY || aiKeys.OPENAI_API_KEY || aiKeys.PEXELS_API_KEY);
+  const shouldUseAiBg = useAiBg !== undefined ? useAiBg : hasImageProvider;
+
+  // Generate AI background (local path → copy to public/assets → serve via BASE_URL)
   let bgImageUrl = imageUrl || null;
-  if (useAiBg) {
+  if (shouldUseAiBg && !bgImageUrl) {
     try {
-      const aiKeys = loadApiKeys();
       console.log(`  🎨 Generating AI background for graphic type="${type}"...`);
-      bgImageUrl = await generateAiBackground(brand, type, aiKeys);
-      console.log(`  ✅ AI background ready`);
+      const localBgPath = await generateAiBackground(brand, type, aiKeys);
+      // Copy to public/assets/graphics so Remotion's Chromium can fetch it via HTTP
+      const bgDir = path.join(PUBLIC_DIR, 'assets', 'graphics');
+      fs.mkdirSync(bgDir, { recursive: true });
+      const bgFilename = `bg-${clientId}-${Date.now()}.jpg`;
+      fs.copyFileSync(localBgPath, path.join(bgDir, bgFilename));
+      try { fs.unlinkSync(localBgPath); } catch (_) {}
+      bgImageUrl = `${BASE_URL}/assets/graphics/${bgFilename}`;
+      console.log(`  ✅ AI background ready: ${bgImageUrl}`);
     } catch (e) {
       console.warn(`  ⚠️  AI background failed (non-fatal): ${e.message}`);
     }
@@ -1649,7 +1691,7 @@ app.post('/api/render/graphic', async (req, res) => {
         codec: 'h264',
         outputLocation: outPath,
         inputProps: graphicProps,
-        ...(BROWSER_EXECUTABLE ? { browserExecutable: BROWSER_EXECUTABLE } : {}),
+        chromiumOptions: { headless: true, disableWebSecurity: true }, ...(BROWSER_EXECUTABLE ? { browserExecutable: BROWSER_EXECUTABLE } : {}),
       });
       return res.json({ success: true, url: `/graphics/${filename}`, filename });
     }
@@ -1665,7 +1707,7 @@ app.post('/api/render/graphic', async (req, res) => {
       output: outPath,
       inputProps: graphicProps,
       imageFormat: 'png',
-      ...(BROWSER_EXECUTABLE ? { browserExecutable: BROWSER_EXECUTABLE } : {}),
+      chromiumOptions: { headless: true, disableWebSecurity: true }, ...(BROWSER_EXECUTABLE ? { browserExecutable: BROWSER_EXECUTABLE } : {}),
     });
 
     res.json({ success: true, url: `/graphics/${filename}`, filename });
@@ -1714,7 +1756,7 @@ app.post('/api/render/carousel', async (req, res) => {
       const filename = `carousel-${clientId}-${timestamp}-${i + 1}.png`;
       const outPath  = path.join(GRAPHICS_DIR, filename);
 
-      await renderStill({ composition: overriddenComp, serveUrl, output: outPath, inputProps: graphicProps, imageFormat: 'png', ...(BROWSER_EXECUTABLE ? { browserExecutable: BROWSER_EXECUTABLE } : {}) });
+      await renderStill({ composition: overriddenComp, serveUrl, output: outPath, inputProps: graphicProps, imageFormat: 'png', chromiumOptions: { headless: true, disableWebSecurity: true }, ...(BROWSER_EXECUTABLE ? { browserExecutable: BROWSER_EXECUTABLE } : {}) });
       urls.push({ slide: i + 1, url: `/graphics/${filename}`, filename });
     }
 
@@ -1802,7 +1844,7 @@ app.post('/api/click-to-ad', async (req, res) => {
             const ts = Date.now();
             const fname = `cta-${clientId}-${gType}-${ts}.png`;
             const outP  = path.join(GRAPHICS_DIR, fname);
-            await renderStill({ composition: oc, serveUrl, output: outP, inputProps: props, imageFormat: 'png', ...(BROWSER_EXECUTABLE ? { browserExecutable: BROWSER_EXECUTABLE } : {}) });
+            await renderStill({ composition: oc, serveUrl, output: outP, inputProps: props, imageFormat: 'png', chromiumOptions: { headless: true, disableWebSecurity: true }, ...(BROWSER_EXECUTABLE ? { browserExecutable: BROWSER_EXECUTABLE } : {}) });
             graphicsResults.push({ type: gType, url: `/graphics/${fname}` });
           } catch (e) { console.warn('Click-to-Ad graphic error:', e.message); }
         }
@@ -1869,7 +1911,7 @@ app.post('/api/render/graphic-variants', async (req, res) => {
       const fname = `variant-${clientId}-${timestamp}-${i + 1}.png`;
       const outPath = path.join(GRAPHICS_DIR, fname);
       try {
-        await renderStill({ composition: oc, serveUrl, output: outPath, inputProps: props, imageFormat: 'png', ...(BROWSER_EXECUTABLE ? { browserExecutable: BROWSER_EXECUTABLE } : {}) });
+        await renderStill({ composition: oc, serveUrl, output: outPath, inputProps: props, imageFormat: 'png', chromiumOptions: { headless: true, disableWebSecurity: true }, ...(BROWSER_EXECUTABLE ? { browserExecutable: BROWSER_EXECUTABLE } : {}) });
         results.push({ label: v.label, type: v.type, bgStyle: v.bgStyle, url: `/graphics/${fname}` });
       } catch (e) {
         results.push({ label: v.label, type: v.type, bgStyle: v.bgStyle, error: e.message });
@@ -1936,7 +1978,7 @@ app.post('/api/ai-edit', async (req, res) => {
       const oc = { ...comp, width: w, height: h, durationInFrames: 1, fps: 30, defaultProps: mergedProps, props: mergedProps };
       const fname = `edited-${clientId}-${Date.now()}.png`;
       const outPath = path.join(GRAPHICS_DIR, fname);
-      await renderStill({ composition: oc, serveUrl, output: outPath, inputProps: mergedProps, imageFormat: 'png', ...(BROWSER_EXECUTABLE ? { browserExecutable: BROWSER_EXECUTABLE } : {}) });
+      await renderStill({ composition: oc, serveUrl, output: outPath, inputProps: mergedProps, imageFormat: 'png', chromiumOptions: { headless: true, disableWebSecurity: true }, ...(BROWSER_EXECUTABLE ? { browserExecutable: BROWSER_EXECUTABLE } : {}) });
       return res.json({ success: true, url: `/graphics/${fname}`, updatedProps: mergedProps });
     } catch (err) {
       return res.status(500).json({ success: false, error: err.message });
@@ -2825,7 +2867,7 @@ app.post('/api/render/content-grid', async (req, res) => {
       const outPath = path.join(GRAPHICS_DIR, fname);
 
       try {
-        await renderStill({ composition: oc, serveUrl, output: outPath, inputProps: graphicProps, imageFormat: 'png', ...(BROWSER_EXECUTABLE ? { browserExecutable: BROWSER_EXECUTABLE } : {}) });
+        await renderStill({ composition: oc, serveUrl, output: outPath, inputProps: graphicProps, imageFormat: 'png', chromiumOptions: { headless: true, disableWebSecurity: true }, ...(BROWSER_EXECUTABLE ? { browserExecutable: BROWSER_EXECUTABLE } : {}) });
         items.push({ label: `${plan.layout}-${plan.bgStyle}`, url: `/graphics/${fname}`, plan });
       } catch (e) {
         console.warn(`⚠️  Content grid render ${i + 1} failed:`, e.message);

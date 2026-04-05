@@ -11,12 +11,15 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libdbus-1-3 \
     libdrm2 \
     libgbm1 \
+    libgl1-mesa-glx \
+    libgles2 \
     libgtk-3-0 \
     libnspr4 \
     libnss3 \
     libxcomposite1 \
     libxdamage1 \
     libxfixes3 \
+    libxkbcommon0 \
     libxrandr2 \
     libxshmfence1 \
     xdg-utils \
@@ -31,7 +34,8 @@ RUN node --max-old-space-size=4096 $(which npm) ci
 
 COPY . .
 
-RUN mkdir -p public/renders public/clients public/assets public/graphics clients .tmp
+RUN mkdir -p public/renders public/clients public/assets public/graphics clients .tmp && \
+    chmod -R 777 public clients .tmp
 
 ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
 ENV CHROME_PATH=/usr/bin/chromium
@@ -39,7 +43,6 @@ ENV NODE_ENV=production
 ENV PORT=4000
 ENV HOST=0.0.0.0
 ENV FFMPEG_PATH=/usr/bin/ffmpeg
-ENV DISPLAY=:99
 
 EXPOSE 4000
 

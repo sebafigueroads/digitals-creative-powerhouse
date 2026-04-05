@@ -193,7 +193,7 @@ async function generateWithGeminiImagen(prompt, width, height, apiKey) {
   if (!res.ok) {
     // Use the Gemini Developer API imagen endpoint instead
     const r2 = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict?key=${apiKey}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-001:predict?key=${apiKey}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -216,6 +216,51 @@ async function generateWithGeminiImagen(prompt, width, height, apiKey) {
   const b64 = data.predictions?.[0]?.bytesBase64Encoded;
   if (!b64) throw new Error('Gemini Imagen returned no image data');
   return Buffer.from(b64, 'base64');
+}
+
+/**
+ * Generate using Runway Gen-4 Image (text-to-image).
+ * Returns a Buffer (JPEG).
+ */
+async function generateWithRunwayImage(prompt, width, height, apiKey) {
+  const ratioMap = {
+    '1920x1080': '16:9',
+    '1280x720':  '16:9',
+    '768x1365':  '9:16',
+    '1080x1920': '9:16',
+    '1080x1080': '1:1',
+  };
+  const key = `${width}x${height}`;
+  const ratio = ratioMap[key] || (width > height ? '16:9' : width < height ? '9:16' : '1:1');
+
+  const res = await fetch('https://api.dev.runwayml.com/v1/text_to_image', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
+      'X-Runway-Version': '2024-11-06',
+    },
+    body: JSON.stringify({ model: 'gen4_image', promptText: prompt.substring(0, 1000), ratio }),
+  });
+  if (!res.ok) throw new Error(`Runway image ${res.status}: ${await res.text()}`);
+  const task = await res.json();
+
+  // Poll for completion (up to 2 minutes)
+  for (let i = 0; i < 24; i++) {
+    await new Promise(r => setTimeout(r, 5000));
+    const poll = await fetch(`https://api.dev.runwayml.com/v1/tasks/${task.id}`, {
+      headers: { Authorization: `Bearer ${apiKey}`, 'X-Runway-Version': '2024-11-06' },
+    });
+    const t = await poll.json();
+    if (t.status === 'SUCCEEDED') {
+      const imgUrl = t.output?.[0];
+      if (!imgUrl) throw new Error('Runway image task succeeded but no output URL');
+      const imgRes = await axios.get(imgUrl, { responseType: 'arraybuffer', timeout: 30000 });
+      return Buffer.from(imgRes.data);
+    }
+    if (t.status === 'FAILED') throw new Error(`Runway image task failed: ${t.failure || 'unknown'}`);
+  }
+  throw new Error('Runway image task timed out after 2 minutes');
 }
 
 /**
@@ -332,11 +377,10 @@ async function fetchPixabayPhoto(query, format, apiKey) {
  * Main image generation function — tries providers in priority order.
  * Returns a local file path (downloaded to .tmp/{jobId}/scene-{i}.jpg).
  */
-async function generateSceneImage({ scene, brand, tone, format, index, jobId, imageStyle = "photorealistic" }) {
+async function generateSceneImage({ scene, brand, tone, format, index, jobId, imageStyle = "photorealistic", imageProvider = 'auto' }) {
   const keys = loadApiKeys();
-  // Prefer scene's own visual_prompt (set by PAS engine or user edit) over generic buildImagePrompt
   const prompt = scene.visual_prompt || buildImagePrompt(scene, brand, tone, imageStyle);
-  console.log(`  🖼  Scene ${index} prompt: ${prompt.substring(0, 80)}...`);
+  console.log(`  🖼  Scene ${index} [${imageProvider}] prompt: ${prompt.substring(0, 80)}...`);
   const { width, height } = format === "16:9"
     ? { width: 1280, height: 720 }
     : format === "1:1"
@@ -347,44 +391,65 @@ async function generateSceneImage({ scene, brand, tone, format, index, jobId, im
   fs.mkdirSync(destDir, { recursive: true });
   const destPath = path.join(destDir, `scene-${index}.jpg`);
 
-  // Priority: Gemini Imagen 3 > Stability > Fal > Replicate > OpenAI (last — has billing limits) > Pexels > Pixabay
-  const providers = [];
+  // Build ordered provider list based on imageProvider preference
+  // 'runway' → Runway first; 'gemini' → Gemini first; 'auto' → Gemini > Runway > others
+  const allProviders = [];
 
-  if (keys.GEMINI_API_KEY) providers.push(async () => {
+  const runwayProvider = keys.RUNWAY_API_KEY ? async () => {
+    console.log(`  🎨 Scene ${index}: Runway Gen-4 Image`);
+    const buf = await generateWithRunwayImage(prompt, width, height, keys.RUNWAY_API_KEY);
+    fs.writeFileSync(destPath, buf);
+    return destPath;
+  } : null;
+
+  const geminiProvider = keys.GEMINI_API_KEY ? async () => {
     console.log(`  🎨 Scene ${index}: Gemini Imagen 3`);
     const buf = await generateWithGeminiImagen(prompt, width, height, keys.GEMINI_API_KEY);
     fs.writeFileSync(destPath, buf);
     return destPath;
-  });
+  } : null;
 
-  if (keys.STABILITY_API_KEY) providers.push(async () => {
+  if (imageProvider === 'runway') {
+    if (runwayProvider) allProviders.push(runwayProvider);
+    if (geminiProvider) allProviders.push(geminiProvider);
+  } else if (imageProvider === 'gemini') {
+    if (geminiProvider) allProviders.push(geminiProvider);
+    if (runwayProvider) allProviders.push(runwayProvider);
+  } else {
+    // auto: Gemini first (fast/free), Runway second (premium quality)
+    if (geminiProvider) allProviders.push(geminiProvider);
+    if (runwayProvider) allProviders.push(runwayProvider);
+  }
+
+  if (keys.STABILITY_API_KEY) allProviders.push(async () => {
     console.log(`  🎨 Scene ${index}: Stability AI`);
     const buf = await generateWithStability(prompt, width, height, keys.STABILITY_API_KEY);
     fs.writeFileSync(destPath, buf);
     return destPath;
   });
 
-  if (keys.FAL_API_KEY) providers.push(async () => {
+  if (keys.FAL_API_KEY) allProviders.push(async () => {
     console.log(`  🎨 Scene ${index}: Fal.ai`);
     const imgUrl = await generateWithFal(prompt, width, height, keys.FAL_API_KEY);
     await downloadImage(imgUrl, destPath);
     return destPath;
   });
 
-  if (keys.REPLICATE_API_KEY) providers.push(async () => {
+  if (keys.REPLICATE_API_KEY) allProviders.push(async () => {
     console.log(`  🎨 Scene ${index}: Replicate`);
     const imgUrl = await generateWithReplicate(prompt, width, height, keys.REPLICATE_API_KEY);
     await downloadImage(imgUrl, destPath);
     return destPath;
   });
 
-  // OpenAI DALL-E last — keep as fallback in case Gemini quota is hit
-  if (keys.OPENAI_API_KEY) providers.push(async () => {
+  if (keys.OPENAI_API_KEY) allProviders.push(async () => {
     console.log(`  🎨 Scene ${index}: OpenAI DALL-E 3`);
     const imgUrl = await generateWithOpenAI(prompt, width, height, keys.OPENAI_API_KEY);
     await downloadImage(imgUrl, destPath);
     return destPath;
   });
+
+  const providers = allProviders;
 
   if (keys.PEXELS_API_KEY) providers.push(async () => {
     console.log(`  🎨 Scene ${index}: Pexels stock`);
@@ -423,13 +488,13 @@ async function generateSceneImage({ scene, brand, tone, format, index, jobId, im
  * Generate images for all scenes sequentially.
  * Each image waits for the previous one before starting.
  */
-async function generateAllSceneImages({ scenes, brand, tone, format, jobId, imageStyle, onProgress }) {
+async function generateAllSceneImages({ scenes, brand, tone, format, jobId, imageStyle, imageProvider = 'auto', onProgress }) {
   const results = [];
 
   for (let i = 0; i < scenes.length; i++) {
     let result = null;
     try {
-      result = await generateSceneImage({ scene: scenes[i], brand, tone, format, index: i, jobId, imageStyle });
+      result = await generateSceneImage({ scene: scenes[i], brand, tone, format, index: i, jobId, imageStyle, imageProvider });
     } catch (e) {
       console.warn(`  ⚠️  Scene ${i} image failed: ${e.message}`);
     }
@@ -1036,7 +1101,7 @@ async function stitchVideo({ outputPath, durationSec, audioMode, narrationPath, 
       return `[${idx}:a]volume=0.5[t${i}]`;
     });
     const labels = audioInputs.map((_, i) => `[t${i}]`).join('');
-    filterComplex = parts.join(';') + `;${labels}amix=inputs=${n}:duration=first:normalize=0[aout]`;
+    filterComplex = parts.join(';') + `;${labels}amix=inputs=${n}:duration=first[aout]`;
     mapAudio = '[aout]';
   }
 
@@ -1460,11 +1525,12 @@ app.post('/api/render', async (req, res) => {
       // Generate AI images for each scene
       const toneEl = req.body.tone || 'Inspirador';
       const imageStyle = req.body.imageStyle || 'photorealistic';
+      const imageProvider = req.body.imageProvider || 'auto';
       emitProgress(jobId, 'progress', { step: 4, total: 5, label: `🎨 Generando ${scenesForRender.length} imágenes AI...`, percent: 60 });
 
       const sceneImages = await generateAllSceneImages({
         scenes: scenesForRender, brand, tone: toneEl, format,
-        jobId, imageStyle,
+        jobId, imageStyle, imageProvider,
         onProgress: ({ scene, total }) => {
           const pct = 60 + Math.round((scene / total) * 10);
           emitProgress(jobId, 'progress', { step: 4, total: 5, label: `🎨 Imagen ${scene + 1}/${total} generada...`, percent: pct });
@@ -1563,25 +1629,44 @@ if (!fs.existsSync(GRAPHICS_DIR)) fs.mkdirSync(GRAPHICS_DIR, { recursive: true }
  */
 /**
  * Generate an AI background image for graphics.
- * Provider cascade: Gemini Imagen 3 → OpenAI DALL-E 3 → Pexels stock.
+ * Provider cascade (respects imageProvider preference):
+ *   runway → Runway Gen-4 Image (premium quality)
+ *   gemini → Gemini Imagen 3 (fast)
+ *   auto   → Gemini → Runway → OpenAI → Pexels
  * Returns a local file path (saved under .tmp/bg-<timestamp>.jpg).
  */
-async function generateAiBackground(brand, graphicType, apiKeys) {
-  const prompt = `High-impact ${graphicType} background for brand "${brand.displayName}". Abstract, cinematic, professional. Primary color: ${brand.colors?.primary || '#000'}. No text, no logos. Suitable as dark overlay background. Style: modern, editorial, bold graphic design.`;
+async function generateAiBackground(brand, graphicType, apiKeys, imageProvider = 'auto') {
+  const prompt = `High-impact ${graphicType} background for brand "${brand.displayName}". Abstract, cinematic, professional. Primary color: ${brand.colors?.primary || '#000'}. No text, no logos. Dark overlay background. Style: modern, editorial, bold graphic design.`;
   const destPath = path.join(__dirname, '.tmp', `bg-${Date.now()}.jpg`);
   fs.mkdirSync(path.join(__dirname, '.tmp'), { recursive: true });
 
-  // 1. Gemini Imagen 3 (free tier supports it with billing enabled)
-  if (apiKeys.GEMINI_API_KEY) {
-    try {
-      console.log('  🎨 AI background: Gemini Imagen 3');
-      const buf = await generateWithGeminiImagen(prompt, 1080, 1080, apiKeys.GEMINI_API_KEY);
-      fs.writeFileSync(destPath, buf);
-      return destPath;
-    } catch (e) { console.warn('  ⚠️  Gemini bg failed:', e.message); }
+  const tryRunway = async () => {
+    if (!apiKeys.RUNWAY_API_KEY) throw new Error('No RUNWAY_API_KEY');
+    console.log('  🎨 AI background: Runway Gen-4 Image');
+    const buf = await generateWithRunwayImage(prompt, 1080, 1080, apiKeys.RUNWAY_API_KEY);
+    fs.writeFileSync(destPath, buf);
+    return destPath;
+  };
+
+  const tryGemini = async () => {
+    if (!apiKeys.GEMINI_API_KEY) throw new Error('No GEMINI_API_KEY');
+    console.log('  🎨 AI background: Gemini Imagen 3');
+    const buf = await generateWithGeminiImagen(prompt, 1080, 1080, apiKeys.GEMINI_API_KEY);
+    fs.writeFileSync(destPath, buf);
+    return destPath;
+  };
+
+  const cascade = imageProvider === 'runway'
+    ? [tryRunway, tryGemini]
+    : imageProvider === 'gemini'
+      ? [tryGemini, tryRunway]
+      : [tryGemini, tryRunway]; // auto: gemini first (faster), runway fallback
+
+  for (const fn of cascade) {
+    try { return await fn(); } catch (e) { console.warn(`  ⚠️  bg provider failed: ${e.message}`); }
   }
 
-  // 2. OpenAI DALL-E 3
+  // OpenAI DALL-E 3 fallback
   if (apiKeys.OPENAI_API_KEY) {
     try {
       console.log('  🎨 AI background: OpenAI DALL-E 3');
@@ -1591,22 +1676,21 @@ async function generateAiBackground(brand, graphicType, apiKeys) {
     } catch (e) { console.warn('  ⚠️  OpenAI bg failed:', e.message); }
   }
 
-  // 3. Pexels stock (always free fallback)
+  // Pexels stock (free fallback)
   if (apiKeys.PEXELS_API_KEY) {
     try {
       console.log('  🎨 AI background: Pexels stock');
-      const query = `${brand.displayName || graphicType} abstract professional`;
-      const url = await fetchPexelsPhoto(query, '1:1', apiKeys.PEXELS_API_KEY);
+      const url = await fetchPexelsPhoto(`${brand.displayName || graphicType} abstract professional`, '1:1', apiKeys.PEXELS_API_KEY);
       await downloadImage(url, destPath);
       return destPath;
     } catch (e) { console.warn('  ⚠️  Pexels bg failed:', e.message); }
   }
 
-  throw new Error('No image provider available for AI background (needs GEMINI_API_KEY, OPENAI_API_KEY, or PEXELS_API_KEY)');
+  throw new Error('No image provider available for AI background (needs RUNWAY_API_KEY, GEMINI_API_KEY, OPENAI_API_KEY, or PEXELS_API_KEY)');
 }
 
 app.post('/api/render/graphic', async (req, res) => {
-  const { clientId, type = 'post', bgStyle = 'dark', headline, subheadline, body, cta, stats, quoteAuthor, imageUrl, animated = false, width: reqW, height: reqH, useAiBg } = req.body;
+  const { clientId, type = 'post', bgStyle = 'dark', headline, subheadline, body, cta, stats, quoteAuthor, imageUrl, animated = false, width: reqW, height: reqH, useAiBg, imageProvider = 'auto' } = req.body;
   if (!clientId || !headline) return res.status(400).json({ success: false, error: 'clientId and headline required' });
 
   const brandFile = path.join(CLIENTS_DIR, clientId, 'brand-identity.json');
@@ -1629,15 +1713,15 @@ app.post('/api/render/graphic', async (req, res) => {
 
   // Auto-enable AI background when any image provider key is available
   const aiKeys = loadApiKeys();
-  const hasImageProvider = !!(aiKeys.GEMINI_API_KEY || aiKeys.OPENAI_API_KEY || aiKeys.PEXELS_API_KEY);
+  const hasImageProvider = !!(aiKeys.RUNWAY_API_KEY || aiKeys.GEMINI_API_KEY || aiKeys.OPENAI_API_KEY || aiKeys.PEXELS_API_KEY);
   const shouldUseAiBg = useAiBg !== undefined ? useAiBg : hasImageProvider;
 
   // Generate AI background (local path → copy to public/assets → serve via BASE_URL)
   let bgImageUrl = imageUrl || null;
   if (shouldUseAiBg && !bgImageUrl) {
     try {
-      console.log(`  🎨 Generating AI background for graphic type="${type}"...`);
-      const localBgPath = await generateAiBackground(brand, type, aiKeys);
+      console.log(`  🎨 Generating AI background [${imageProvider}] for graphic type="${type}"...`);
+      const localBgPath = await generateAiBackground(brand, type, aiKeys, imageProvider);
       // Copy to public/assets/graphics so Remotion's Chromium can fetch it via HTTP
       const bgDir = path.join(PUBLIC_DIR, 'assets', 'graphics');
       fs.mkdirSync(bgDir, { recursive: true });
@@ -2548,38 +2632,61 @@ app.post('/api/render/video', async (req, res) => {
       const filename = `mashup-${clientId}-${timestamp}.mp4`;
       const outPath = path.join(RENDERS_DIR, filename);
 
-      // Use ffmpeg concat with xfade transition between clips
-      const fadeDuration = 0.5;
+      // Get actual clip durations via ffprobe for correct xfade offsets
+      const FFPROBE = FFMPEG.replace(/ffmpeg$/, 'ffprobe');
+      async function getClipDuration(filePath) {
+        try {
+          const { stdout } = await execFileAsync(FFPROBE, [
+            '-v', 'quiet', '-print_format', 'json', '-show_format', filePath,
+          ], { timeout: 30000 });
+          return parseFloat(JSON.parse(stdout).format?.duration) || 5;
+        } catch (_) { return 5; }
+      }
+
       if (resolvedPaths.length === 1) {
-        await execFileAsync(FFMPEG, ['-y', '-i', resolvedPaths[0], '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-crf', '18', outPath], { timeout: 600000 }); // 10 min timeout for production
+        // Single clip: just re-encode to standard format
+        await execFileAsync(FFMPEG, [
+          '-y', '-i', resolvedPaths[0],
+          '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-crf', '18', '-preset', 'fast',
+          '-c:a', 'aac', '-b:a', '128k',
+          outPath,
+        ], { timeout: 600000 });
       } else {
-        // Build complex xfade filter for smooth transitions
-        const inputs = resolvedPaths.flatMap(p => ['-i', p]);
-        let filterParts = [];
-        let prevLabel = '[0:v]';
-        let totalDur = 0;
+        // Get actual durations for correct xfade offset calculation
+        const durations = await Promise.all(resolvedPaths.map(getClipDuration));
+        const fadeDuration = 0.5;
 
-        for (let i = 1; i < resolvedPaths.length; i++) {
-          const curLabel = `[v${i}]`;
-          // Estimate clip duration (default 5s per clip for offset calculation)
-          const offset = Math.max(0, totalDur + 5 - fadeDuration);
-          totalDur += 5;
-          const outLabel = i === resolvedPaths.length - 1 ? '[vout]' : `[xfade${i}]`;
-          filterParts.push(`${prevLabel}[${i}:v]xfade=transition=fade:duration=${fadeDuration}:offset=${offset}${outLabel}`);
-          prevLabel = `[xfade${i}]`;
-        }
+        try {
+          const inputs = resolvedPaths.flatMap(p => ['-i', p]);
+          const filterParts = [];
+          let prevLabel = '[0:v]';
+          let cumulativeDur = 0;
 
-        if (filterParts.length > 0) {
+          for (let i = 1; i < resolvedPaths.length; i++) {
+            cumulativeDur += durations[i - 1];
+            const offset = Math.max(0, cumulativeDur - fadeDuration);
+            const outLabel = i === resolvedPaths.length - 1 ? '[vout]' : `[xfade${i}]`;
+            filterParts.push(`${prevLabel}[${i}:v]xfade=transition=fade:duration=${fadeDuration}:offset=${offset}${outLabel}`);
+            prevLabel = outLabel === `[xfade${i}]` ? `[xfade${i}]` : '[vout]';
+          }
+
           await execFileAsync(FFMPEG, [
             '-y', ...inputs,
             '-filter_complex', filterParts.join(';'),
             '-map', '[vout]',
             '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-crf', '18', '-preset', 'fast',
+            '-an', // audio handled separately if needed
             outPath,
-          ], { timeout: 600000 }); // 10 min timeout for production
-        } else {
-          // Fallback to simple concat
-          await execFileAsync(FFMPEG, ['-y', '-f', 'concat', '-safe', '0', '-i', concatList, '-c', 'copy', outPath], { timeout: 600000 }); // 10 min timeout for production
+          ], { timeout: 600000 });
+        } catch (xfadeErr) {
+          console.warn(`  ⚠️  xfade failed (${xfadeErr.message}) — falling back to simple concat`);
+          // Simple concat fallback: re-encode all clips to uniform codec/resolution
+          await execFileAsync(FFMPEG, [
+            '-y', '-f', 'concat', '-safe', '0', '-i', concatList,
+            '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-crf', '20', '-preset', 'fast',
+            '-c:a', 'aac', '-b:a', '128k',
+            outPath,
+          ], { timeout: 600000 });
         }
       }
 

@@ -1,5 +1,5 @@
 [phases.setup]
-nixPkgs = ["nodejs_20", "ffmpeg", "chromium", "nss", "nspr", "atk", "cups", "dbus", "libdrm", "mesa", "gtk3", "pango", "xorg.libXcomposite", "xorg.libXdamage", "xorg.libXfixes", "xorg.libXrandr", "xorg.libxshmfence"]
+nixPkgs = ["nodejs_20", "ffmpeg", "chromium", "nss", "nspr", "atk", "at-spi2-atk", "cups", "dbus", "libdrm", "mesa", "libGL", "libgles", "gtk3", "pango", "glib", "alsa-lib", "libxkbcommon", "xorg.libX11", "xorg.libXext", "xorg.libXcomposite", "xorg.libXdamage", "xorg.libXfixes", "xorg.libXrandr", "xorg.libxshmfence", "xorg.libXtst", "xorg.libXi", "xdg-utils"]
 
 [phases.install]
 cmds = ["npm ci"]
@@ -14,3 +14,6 @@ cmd = "node studio-server.mjs"
 NODE_ENV = "production"
 FFMPEG_PATH = "ffmpeg"
 PUPPETEER_EXECUTABLE_PATH = "chromium"
+CHROME_PATH = "chromium"
+HOST = "0.0.0.0"
+PORT = "4000"

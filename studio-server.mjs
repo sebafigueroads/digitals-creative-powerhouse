@@ -172,10 +172,10 @@ async function downloadImage(url, destPath, retries = 3) {
  * Returns a local Buffer (PNG).
  */
 async function generateWithGeminiImagen(prompt, width, height, apiKey) {
-  // Use gemini-2.0-flash-preview-image-generation (free tier, no billing required).
+  // Use gemini-2.0-flash-exp (supports image generation via responseModalities).
   // Returns inline base64 image data via generateContent API.
   const res = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-preview-image-generation:generateContent?key=${apiKey}`,
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${apiKey}`,
     {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -2055,11 +2055,10 @@ app.post('/api/ai-edit', async (req, res) => {
 // ── SSE progress ──────────────────────────────────────────────────────────────
 app.get('/api/render/progress/:jobId', (req, res) => {
   res.setHeader('Content-Type', 'text/event-stream');
-  res.setHeader('Cache-Control', 'no-cache');
-  res.setHeader('Connection', 'keep-alive');
-  res.flushHeaders();
-  res.setHeader('X-Accel-Buffering', 'no');   // Nginx: disable buffering
   res.setHeader('Cache-Control', 'no-cache, no-store');
+  res.setHeader('Connection', 'keep-alive');
+  res.setHeader('X-Accel-Buffering', 'no');   // Nginx: disable buffering
+  res.flushHeaders();
 
   if (!sseJobs.has(req.params.jobId)) {
     res.write(`event: error\ndata: ${JSON.stringify({ message: 'Job not found' })}\n\n`);

@@ -12,6 +12,7 @@ import {
   spring,
   Sequence,
   Img,
+  OffthreadVideo,
   staticFile,
   Audio,
 } from "remotion";
@@ -37,6 +38,7 @@ export interface BrandIdentity {
     body: string;
   };
   gradient: string;
+  website?: string;
 }
 
 export type AspectRatio = "9:16" | "16:9" | "1:1";
@@ -66,6 +68,8 @@ export interface ClientVideoProps {
   transition?: TransitionType;
   /** AI-generated image URLs (one per scene, from /assets/scenes/{jobId}/scene-{i}.jpg) */
   sceneImageUrls?: (string | null)[];
+  /** AI-generated video clip URLs (one per scene, from /assets/clips/{jobId}/scene-{i}.mp4) */
+  sceneVideoUrls?: (string | null)[];
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -164,7 +168,7 @@ const ParticleField: React.FC<{ primary: string; secondary: string; count?: numb
   );
 };
 
-// ─── AI Scene Background ──────────────────────────────────────────────────────
+// ─── AI Scene Background (static image) ──────────────────────────────────────
 const AISceneBackground: React.FC<{
   imageUrl: string;
   primaryColor: string;
@@ -205,14 +209,51 @@ const AISceneBackground: React.FC<{
   );
 };
 
+// ─── AI Scene Video Background (real AI-generated video clip) ────────────────
+const AISceneVideoBackground: React.FC<{
+  videoUrl: string;
+  primaryColor: string;
+  totalFrames: number;
+}> = ({ videoUrl, primaryColor, totalFrames }) => {
+  const frame = useCurrentFrame();
+  const opacity = Math.min(clamp(frame / 12), clamp((totalFrames - frame) / 12));
+
+  return (
+    <AbsoluteFill style={{ overflow: "hidden" }}>
+      {/* AI-generated video clip — real motion, not static */}
+      <AbsoluteFill style={{ opacity }}>
+        <OffthreadVideo
+          src={videoUrl}
+          style={{ width: "100%", height: "100%", objectFit: "cover" }}
+          muted
+        />
+      </AbsoluteFill>
+      {/* Subtle dark gradient overlay so text stays readable */}
+      <AbsoluteFill style={{
+        background: `linear-gradient(
+          to bottom,
+          rgba(0,0,0,0.25) 0%,
+          rgba(0,0,0,0.08) 40%,
+          rgba(0,0,0,0.45) 100%
+        )`,
+      }} />
+      {/* Brand color tint strip at bottom */}
+      <AbsoluteFill style={{
+        background: `linear-gradient(to top, ${primaryColor}25 0%, transparent 30%)`,
+      }} />
+    </AbsoluteFill>
+  );
+};
+
 // ─── Scene Wrapper (applies transition + optional AI background) ──────────────
 const SceneWrapper: React.FC<{
   children: React.ReactNode;
   totalFrames: number;
   transition: TransitionType;
   aiImageUrl?: string | null;
+  aiVideoUrl?: string | null;
   primaryColor?: string;
-}> = ({ children, totalFrames, transition, aiImageUrl, primaryColor = "#000" }) => {
+}> = ({ children, totalFrames, transition, aiImageUrl, aiVideoUrl, primaryColor = "#000" }) => {
   const frame = useCurrentFrame();
   const opacity = transition === "fade" || transition === "wipe"
     ? sceneFade(frame, totalFrames)
@@ -224,14 +265,20 @@ const SceneWrapper: React.FC<{
       transform: transitionTransform(frame, totalFrames, transition),
       filter: transitionFilter(frame, totalFrames, transition),
     }}>
-      {/* AI-generated background image if available */}
-      {aiImageUrl && (
+      {/* AI-generated video clip takes priority over static image */}
+      {aiVideoUrl ? (
+        <AISceneVideoBackground
+          videoUrl={aiVideoUrl}
+          primaryColor={primaryColor}
+          totalFrames={totalFrames}
+        />
+      ) : aiImageUrl ? (
         <AISceneBackground
           imageUrl={aiImageUrl}
           primaryColor={primaryColor}
           totalFrames={totalFrames}
         />
-      )}
+      ) : null}
       {/* Scene content on top */}
       {children}
     </AbsoluteFill>
@@ -585,6 +632,7 @@ export const ClientVideo: React.FC<ClientVideoProps> = ({
   durationSeconds = 21,
   transition      = "zoom-in",
   sceneImageUrls  = [],
+  sceneVideoUrls  = [],
 }) => {
   const fps         = 30;
   const OUTRO_FRAMES = 45; // 1.5s logo outro
@@ -626,8 +674,10 @@ export const ClientVideo: React.FC<ClientVideoProps> = ({
 
       {scenes.map((scene, i) => {
         const aiUrl = sceneImageUrls[i] ?? null;
-        // When AI image present, scenes use transparent backgrounds so image shows through
-        const sceneBrand = aiUrl
+        const videoUrl = sceneVideoUrls[i] ?? null;
+        // When AI background present (video or image), scenes use transparent backgrounds
+        const hasAiBg = videoUrl || aiUrl;
+        const sceneBrand = hasAiBg
           ? {
               ...brand,
               colors: {
@@ -650,6 +700,7 @@ export const ClientVideo: React.FC<ClientVideoProps> = ({
               totalFrames={sceneFrames[i]}
               transition={transition}
               aiImageUrl={aiUrl || null}
+              aiVideoUrl={videoUrl || null}
               primaryColor={brand.colors.primary}
             >
               {scene.type === "hook"    && <HookScene    brand={sceneBrand} scene={scene} format={format} />}

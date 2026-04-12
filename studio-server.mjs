@@ -1146,6 +1146,7 @@ function formatDimensions(format) {
 async function renderVideoFrames({
   jobId, brand, scenes, format, durationSeconds, transition,
   sceneImageUrls = [],
+  sceneVideoUrls = [],
   onProgress,
 }) {
   const serveUrl = await getBundle();
@@ -1174,6 +1175,7 @@ async function renderVideoFrames({
     durationSeconds: Number(durationSeconds),
     transition:      transition || "zoom-in",
     sceneImageUrls,
+    sceneVideoUrls,
   };
 
   console.log(`🎬 Rendering ${jobId} — brand="${brand.displayName}" scenes=${scenes.length} format=${format} dur=${durationSeconds}s images=${sceneImageUrls.filter(Boolean).length}`);
@@ -1530,6 +1532,42 @@ app.post('/api/render', async (req, res) => {
 
       emitProgress(jobId, 'progress', { step: 4, total: 5, label: `✅ ${sceneImages.filter(Boolean).length}/${scenesForRender.length} imágenes listas ✓`, percent: 71 });
 
+      // Step 4b: Generate AI video clips for scenes (if video provider available)
+      const keys = loadApiKeys();
+      const hasVideoProvider = keys.KLING_ACCESS_KEY || keys.RUNWAY_API_KEY || keys.FAL_API_KEY || keys.REPLICATE_API_KEY;
+      let sceneVideoUrls = [];
+
+      if (hasVideoProvider) {
+        emitProgress(jobId, 'progress', { step: 4, total: 5, label: '🎬 Generando clips de video AI...', percent: 72 });
+
+        for (let i = 0; i < scenesForRender.length; i++) {
+          const scene = scenesForRender[i];
+          const visualPrompt = scene.visual_prompt || scene.title || '';
+          try {
+            emitProgress(jobId, 'progress', { step: 4, total: 5, label: `🎬 Video clip ${i + 1}/${scenesForRender.length}...`, percent: 72 + Math.round((i / scenesForRender.length) * 10) });
+            const result = await generateSceneVideo({
+              scene, brand, tone: toneEl, format, index: i, jobId,
+              prompt: visualPrompt,
+            });
+            if (result?.path) {
+              // Copy to public and create URL
+              const videoDir = path.join(PUBLIC_DIR, 'assets', 'clips', jobId);
+              fs.mkdirSync(videoDir, { recursive: true });
+              const dest = path.join(videoDir, `scene-${i}.mp4`);
+              fs.copyFileSync(result.path, dest);
+              sceneVideoUrls.push(`${BASE_URL}/assets/clips/${jobId}/scene-${i}.mp4`);
+            } else {
+              sceneVideoUrls.push(null);
+            }
+          } catch (e) {
+            console.warn(`  ⚠️ Video clip ${i} failed (falling back to image):`, e.message);
+            sceneVideoUrls.push(null);
+          }
+        }
+
+        emitProgress(jobId, 'progress', { step: 4, total: 5, label: `✅ ${sceneVideoUrls.filter(Boolean).length}/${scenesForRender.length} video clips listos`, percent: 83 });
+      }
+
       // Step 5: Render frames with Remotion
       emitProgress(jobId, 'progress', { step: 5, total: 5, label: '🎬 Renderizando frames con Remotion...', percent: 72 });
 
@@ -1537,6 +1575,7 @@ app.post('/api/render', async (req, res) => {
         jobId, brand, scenes: scenesForRender,
         format, durationSeconds: Number(durationSeconds), transition,
         sceneImageUrls,
+        sceneVideoUrls,
         onProgress: (p) => emitProgress(jobId, 'progress', { step: 5, total: 5, ...p }),
       });
 

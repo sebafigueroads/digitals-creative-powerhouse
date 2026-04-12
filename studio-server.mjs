@@ -1738,11 +1738,9 @@ async function generateAiBackground(brand, graphicType, apiKeys, imageProvider =
     return destPath;
   };
 
-  const cascade = imageProvider === 'runway'
-    ? [tryRunway, tryGemini]
-    : imageProvider === 'gemini'
-      ? [tryGemini, tryRunway]
-      : [tryGemini, tryRunway]; // auto: gemini first (faster), runway fallback
+  const cascade = imageProvider === 'gemini'
+    ? [tryGemini, tryRunway]
+    : [tryRunway, tryGemini]; // auto & runway: Runway first (reliable paid), Gemini fallback
 
   for (const fn of cascade) {
     try { return await fn(); } catch (e) { console.warn(`  ⚠️  bg provider failed: ${e.message}`); }
@@ -1817,8 +1815,11 @@ app.post('/api/render/graphic', async (req, res) => {
     }
   }
 
+  // Force bgStyle to 'image' when we have an AI-generated background
+  const effectiveBgStyle = bgImageUrl ? 'image' : bgStyle;
+
   const graphicProps = {
-    type, bgStyle, headline,
+    type, bgStyle: effectiveBgStyle, headline,
     subheadline: subheadline || '',
     body: body || '',
     cta: cta || '',
@@ -2071,11 +2072,29 @@ app.post('/api/render/graphic-variants', async (req, res) => {
     const brandObj  = { clientId: brand.clientId, displayName: brand.displayName, colors: brand.colors, fonts: brand.fonts, gradient: brand.gradient, website: brand.website || '' };
     const results   = [];
 
+    // Generate 1 AI background and reuse across variants
+    const aiKeys = loadApiKeys();
+    let sharedBgUrl = null;
+    try {
+      const localBgPath = await generateAiBackground(brand, 'post', aiKeys);
+      const bgDir = path.join(PUBLIC_DIR, 'assets', 'graphics');
+      fs.mkdirSync(bgDir, { recursive: true });
+      const bgFilename = `bg-variants-${clientId}-${timestamp}.jpg`;
+      fs.copyFileSync(localBgPath, path.join(bgDir, bgFilename));
+      try { fs.unlinkSync(localBgPath); } catch (_) {}
+      sharedBgUrl = `${BASE_URL}/assets/graphics/${bgFilename}`;
+      console.log(`  ✅ Shared AI background for variants: ${sharedBgUrl}`);
+    } catch (e) {
+      console.warn(`  ⚠️  AI background for variants failed (using CSS): ${e.message}`);
+    }
+
     for (let i = 0; i < selected.length; i++) {
       const v = selected[i];
       const DIMS = { post: { w: 1080, h: 1080 }, quote: { w: 1080, h: 1080 }, stats: { w: 1080, h: 1080 }, banner: { w: 1920, h: 1080 }, story: { w: 1080, h: 1920 } };
       const { w, h } = DIMS[v.type] || DIMS.post;
-      const props = { type: v.type, bgStyle: v.bgStyle, headline, subheadline, body, cta, stats: [], quoteAuthor: '', imageUrl: null, logoUrl: null, animated: false, brand: brandObj };
+      const useBg = sharedBgUrl && (v.bgStyle === 'dark' || v.bgStyle === 'gradient' || v.bgStyle === 'mesh');
+      const effectiveBgStyle = useBg ? 'image' : v.bgStyle;
+      const props = { type: v.type, bgStyle: effectiveBgStyle, headline, subheadline, body, cta, stats: [], quoteAuthor: '', imageUrl: useBg ? sharedBgUrl : null, logoUrl: null, animated: false, brand: brandObj };
       const oc = { ...comp, width: w, height: h, durationInFrames: 1, fps: 30, defaultProps: props, props };
       const fname = `variant-${clientId}-${timestamp}-${i + 1}.png`;
       const outPath = path.join(GRAPHICS_DIR, fname);

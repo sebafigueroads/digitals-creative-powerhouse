@@ -470,11 +470,10 @@ video{border-radius:10px;background:#000}
           <div style="font-size:12px;font-weight:700;color:#f97316">Template IA</div>
           <div style="font-size:10px;color:#484850;margin-top:2px">Composición dinámica</div>
         </div>
-        <div class="card-sm" style="padding:12px;cursor:pointer;border:1px solid #1c1c22;opacity:.5;transition:.2s;text-align:center;position:relative" id="mode-veo">
+        <div class="card-sm" style="padding:12px;cursor:pointer;border:1px solid #1c1c22;transition:.2s;text-align:center" id="mode-veo" onclick="setAiMode('veo')">
           <div style="font-size:20px;margin-bottom:4px">🎥</div>
-          <div style="font-size:12px;font-weight:700;color:#e2e8f0">Veo + Lyria</div>
-          <div style="font-size:10px;color:#484850;margin-top:2px">Google AI (próximamente)</div>
-          <div style="position:absolute;top:6px;right:6px;background:rgba(249,115,22,.2);color:#f97316;font-size:9px;font-weight:700;padding:1px 5px;border-radius:6px">SOON</div>
+          <div style="font-size:12px;font-weight:700;color:#e2e8f0">Video AI</div>
+          <div style="font-size:10px;color:#484850;margin-top:2px">Video AI (Kling + Runway)</div>
         </div>
       </div>
     </div>
@@ -1696,7 +1695,8 @@ async function generateScript() {
   }
 }
 
-function regenerateScript() {
+async function regenerateScript() {
+  if (!S.clientId) return notify('Selecciona un cliente primero', 'error');
   // Clear storyboard, audio preview and scene state to avoid inconsistencies
   S.scenes = [];
   S.jobId  = null;
@@ -1705,21 +1705,29 @@ function regenerateScript() {
   const audioPlayer = document.getElementById('tts-preview-player');
   if (audioPlayer) { audioPlayer.src = ''; audioPlayer.parentElement && (audioPlayer.parentElement.style.display = 'none'); }
   document.getElementById('scene-count').textContent = '';
-  notify('🔄 Regenerando guion...', 'info');
-  generateScript();
+  const prompt = document.getElementById('prompt-input')?.value || '';
+  notify('Regenerando guión...', 'info');
+  await generateScript(prompt);
 }
 
-function shortenScript() {
-  const words = document.getElementById('script-editor').value.trim().split(/\s+/);
-  const shorter = words.slice(0, Math.floor(words.length * 0.75)).join(' ') + '.';
-  document.getElementById('script-editor').value = shorter;
+async function shortenScript() {
+  const editor = document.getElementById('script-editor');
+  if (!editor?.value) return;
+  const words = editor.value.split(/\s+/);
+  const target = Math.floor(words.length * 0.7);
+  editor.value = words.slice(0, target).join(' ') + '.';
+  S.script = editor.value;
   updateWordCount();
+  notify('Guión acortado 30%', 'info');
 }
 
-function expandScript() {
-  const cur = document.getElementById('script-editor').value.trim();
-  document.getElementById('script-editor').value = cur + ' ¡No pierdas más tiempo! ' + S.scenes?.[S.scenes.length - 1]?.voiceover || '';
+async function expandScript() {
+  const editor = document.getElementById('script-editor');
+  if (!editor?.value) return;
+  editor.value = editor.value.replace(/\. /g, '. Además, ');
+  S.script = editor.value;
   updateWordCount();
+  notify('Guión expandido', 'info');
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -2020,11 +2028,18 @@ function listenProgress(jobId) {
 function shareVideo(platform, url) {
   const videoUrl = url || S.videoUrl;
   if (!videoUrl) return;
-  fetch('/api/send-channel', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ platform, videoUrl }),
-  }).then(() => notify(`Video enviado a ${platform}`, 'success'));
+  if (platform === 'whatsapp') {
+    window.open('https://wa.me/?text=Mira+este+video:+' + encodeURIComponent(videoUrl), '_blank');
+  } else if (platform === 'drive') {
+    const a = document.createElement('a');
+    a.href = videoUrl;
+    a.download = '';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  } else if (platform === 'slack') {
+    navigator.clipboard.writeText(videoUrl).then(() => notify('URL copiada', 'success'));
+  }
 }
 
 // ═══════════════════════════════════════════════════════════════

@@ -19,5 +19,10 @@
     "body":    "'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif"
   },
   "googleFonts": "https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap",
-  "gradient": "linear-gradient(135deg, #FA5000 0%, #CD2349 100%)"
+  "gradient": "linear-gradient(135deg, #FA5000 0%, #CD2349 100%)",
+  "heroImages": ["hero-0.jpg"],
+  "heroImageOriginals": ["https://hapee.ai/img/robot.png"],
+  "featureImages": [],
+  "featureImageOriginals": ["https://hapee.ai/img/feat-ia.webp", "https://hapee.ai/img/feat-crm.webp", "https://hapee.ai/img/feat-auto.webp", "https://hapee.ai/img/feat-omni.webp"],
+  "allImages": ["https://hapee.ai/img/robot.png", "https://hapee.ai/img/feat-ia.webp", "https://hapee.ai/img/feat-crm.webp"]
 }

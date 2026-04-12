@@ -697,6 +697,54 @@ async function generateSceneVideo({ scene, brand, tone, format, index, jobId, pr
   return null;
 }
 
+/**
+ * Generate a cinematic video clip from a brand image using Runway image-to-video.
+ * Takes a brand image (e.g., hero/feature image) and creates a 5-second cinematic clip.
+ * @param {string} imageUrl - URL of the brand image to animate
+ * @param {string} prompt - Cinematic prompt describing the desired animation
+ * @param {string} format - Aspect ratio ('9:16', '16:9', '1:1')
+ * @param {string} jobId - Job ID for file organization
+ * @param {number} index - Scene index for file naming
+ * @returns {{ path: string, provider: string } | null}
+ */
+async function generateBrandVideoClip({ imageUrl, prompt, format, jobId, index }) {
+  const keys = loadApiKeys();
+  const videoDir = path.join(__dirname, '.tmp', jobId, 'brand-clips');
+  fs.mkdirSync(videoDir, { recursive: true });
+  const destPath = path.join(videoDir, `brand-clip-${index}.mp4`);
+
+  const cinematicPrompt = `${prompt || 'Cinematic camera movement, professional commercial'}. Smooth motion, epic lighting, high production value, no text overlays.`;
+
+  // Primary: Runway image-to-video (best for image animation)
+  if (keys.RUNWAY_API_KEY) {
+    try {
+      console.log(`  🎬 Brand clip ${index}: Runway image-to-video`);
+      const url = await generateWithRunway(cinematicPrompt, imageUrl, format, keys.RUNWAY_API_KEY);
+      if (!url) throw new Error('No Runway output URL');
+      await downloadImage(url, destPath);
+      return { path: destPath, provider: 'runway' };
+    } catch (e) {
+      console.warn(`  ⚠️  Runway brand clip failed: ${e.message}`);
+    }
+  }
+
+  // Fallback: Kling native (if available, use text-to-video since Kling i2v needs different API)
+  if (keys.KLING_ACCESS_KEY && keys.KLING_SECRET_KEY) {
+    try {
+      console.log(`  🎬 Brand clip ${index}: Kling Native (text-to-video fallback)`);
+      const url = await generateWithKlingNative(cinematicPrompt, format, keys.KLING_ACCESS_KEY, keys.KLING_SECRET_KEY);
+      if (!url) throw new Error('No Kling output URL');
+      await downloadImage(url, destPath);
+      return { path: destPath, provider: 'kling' };
+    } catch (e) {
+      console.warn(`  ⚠️  Kling brand clip failed: ${e.message}`);
+    }
+  }
+
+  console.warn(`  ⚠️  No video provider available for brand clip ${index}`);
+  return null;
+}
+
 // ─── SSE job registry ─────────────────────────────────────────────────────────
 const sseJobs = new Map();
 
@@ -1023,6 +1071,90 @@ async function scrapeBrand(url) {
 
   const ogImage = $('meta[property="og:image"]').attr('content');
 
+  // ── Hero Images ─────────────────────────────────────────────
+  const heroImages = [];
+  const heroSelectors = [
+    'section[class*="hero"i] img', 'section[id*="hero"i] img',
+    'div[class*="hero"i] img', 'div[id*="hero"i] img',
+    'section[class*="banner"i] img', 'div[class*="banner"i] img',
+    'section[class*="main"i] img', 'div[id*="main"i] img',
+    'section:first-of-type img',
+  ];
+  const seenHeroSrcs = new Set();
+  for (const sel of heroSelectors) {
+    $(sel).each((_, el) => {
+      let src = $(el).attr('src') || $(el).attr('data-src') || $(el).attr('data-lazy-src') || '';
+      if (!src || seenHeroSrcs.has(src)) return;
+      // Skip small icons/svgs
+      const w = parseInt($(el).attr('width') || '0', 10);
+      const h = parseInt($(el).attr('height') || '0', 10);
+      if (src.endsWith('.svg') && (w < 50 || h < 50 || (!w && !h))) return;
+      if (src.includes('favicon')) return;
+      if ((w && w < 200) || (h && h < 200)) return;
+      // Make absolute
+      if (!src.startsWith('http')) { try { src = new URL(src, url).href; } catch (_) { return; } }
+      seenHeroSrcs.add(src);
+      heroImages.push(src);
+    });
+  }
+  // Also grab large images (>200px) from the page top area
+  $('img').each((_, el) => {
+    if (heroImages.length >= 5) return false;
+    let src = $(el).attr('src') || $(el).attr('data-src') || '';
+    if (!src || seenHeroSrcs.has(src)) return;
+    const w = parseInt($(el).attr('width') || '0', 10);
+    const h = parseInt($(el).attr('height') || '0', 10);
+    if ((w > 200 || h > 200) && !src.includes('favicon') && !src.includes('logo')) {
+      if (!src.startsWith('http')) { try { src = new URL(src, url).href; } catch (_) { return; } }
+      seenHeroSrcs.add(src);
+      heroImages.push(src);
+    }
+  });
+
+  // ── Feature Images ──────────────────────────────────────────
+  const featureImages = [];
+  const featureSelectors = [
+    'section[class*="feature"i] img', 'div[class*="feature"i] img',
+    'section[class*="service"i] img', 'div[class*="service"i] img',
+    'section[class*="benefit"i] img', 'div[class*="benefit"i] img',
+    'section[class*="product"i] img', 'div[class*="product"i] img',
+  ];
+  const seenFeatureSrcs = new Set();
+  for (const sel of featureSelectors) {
+    $(sel).each((_, el) => {
+      if (featureImages.length >= 6) return false;
+      let src = $(el).attr('src') || $(el).attr('data-src') || '';
+      if (!src || seenFeatureSrcs.has(src) || seenHeroSrcs.has(src)) return;
+      const alt = ($(el).attr('alt') || '').trim();
+      if (src.endsWith('.svg') || src.includes('favicon') || src.includes('logo')) return;
+      if (!src.startsWith('http')) { try { src = new URL(src, url).href; } catch (_) { return; } }
+      seenFeatureSrcs.add(src);
+      featureImages.push({ url: src, alt });
+    });
+  }
+
+  // ── All Significant Images ──────────────────────────────────
+  const allImages = [];
+  const seenAllSrcs = new Set([...seenHeroSrcs, ...seenFeatureSrcs]);
+  // Start with hero + feature, then fill with other significant images
+  heroImages.forEach(src => { if (allImages.length < 10) allImages.push(src); seenAllSrcs.add(src); });
+  featureImages.forEach(fi => { if (allImages.length < 10 && !seenAllSrcs.has(fi.url)) { allImages.push(fi.url); seenAllSrcs.add(fi.url); } });
+  $('img').each((_, el) => {
+    if (allImages.length >= 10) return false;
+    let src = $(el).attr('src') || $(el).attr('data-src') || '';
+    if (!src || seenAllSrcs.has(src)) return;
+    if (src.endsWith('.svg') || src.includes('favicon') || src.includes('data:image')) return;
+    const w = parseInt($(el).attr('width') || '0', 10);
+    const h = parseInt($(el).attr('height') || '0', 10);
+    // Accept images >100px, or images with no specified size if in main content
+    const inMainContent = $(el).closest('main, article, section, .content, [role="main"]').length > 0;
+    if (w > 100 || h > 100 || ((!w && !h) && inMainContent)) {
+      if (!src.startsWith('http')) { try { src = new URL(src, url).href; } catch (_) { return; } }
+      seenAllSrcs.add(src);
+      allImages.push(src);
+    }
+  });
+
   return {
     displayName,
     description,
@@ -1047,6 +1179,9 @@ async function scrapeBrand(url) {
     gradient: `linear-gradient(135deg, ${primary} 0%, ${secondary} 100%)`,
     logoUrl:  logoSrc || null,
     ogImage:  ogImage || null,
+    heroImages: heroImages.slice(0, 5),
+    featureImages: featureImages.slice(0, 6).map(fi => typeof fi === 'object' ? fi.url : fi),
+    allImages: allImages.slice(0, 10),
   };
 }
 
@@ -1430,8 +1565,8 @@ app.get('/api/clients/:id', (req, res) => {
   }
 });
 
-app.post('/api/clients', (req, res) => {
-  const { clientId, displayName, colors, fonts, website, description } = req.body;
+app.post('/api/clients', async (req, res) => {
+  const { clientId, displayName, colors, fonts, website, description, heroImages: inHero, featureImages: inFeature, allImages: inAll } = req.body;
   if (!clientId || !displayName) return res.status(400).json({ success: false, error: 'clientId and displayName required' });
 
   const safeId   = clientId.toLowerCase().replace(/[^a-z0-9-]/g, '-');
@@ -1454,8 +1589,56 @@ app.post('/api/clients', (req, res) => {
   };
 
   fs.mkdirSync(clientDir, { recursive: true });
-  fs.writeFileSync(path.join(clientDir, 'brand-identity.json'), JSON.stringify(brand, null, 2));
   fs.mkdirSync(path.join(PUB_CLIENTS, safeId), { recursive: true });
+
+  // Download and save scraped brand images (hero, feature, all) in background
+  const heroImageUrls = Array.isArray(inHero) ? inHero.slice(0, 5) : [];
+  const featureImageUrls = Array.isArray(inFeature) ? inFeature.slice(0, 6) : [];
+  const allImageUrls = Array.isArray(inAll) ? inAll.slice(0, 10) : [];
+
+  const savedHero = [];
+  const savedFeature = [];
+
+  // Download hero images
+  for (let i = 0; i < heroImageUrls.length; i++) {
+    try {
+      const ext = 'jpg';
+      const localName = `hero-${i}.${ext}`;
+      const destClient = path.join(clientDir, localName);
+      const destPub = path.join(PUB_CLIENTS, safeId, localName);
+      await downloadImage(heroImageUrls[i], destClient);
+      fs.copyFileSync(destClient, destPub);
+      savedHero.push({ original: heroImageUrls[i], local: `/clients/${safeId}/${localName}` });
+      console.log(`  📸 Saved hero image ${i}: ${localName}`);
+    } catch (e) {
+      console.warn(`  ⚠️  Failed to download hero image ${i}: ${e.message}`);
+    }
+  }
+
+  // Download feature images
+  for (let i = 0; i < featureImageUrls.length; i++) {
+    try {
+      const ext = 'jpg';
+      const localName = `feature-${i}.${ext}`;
+      const destClient = path.join(clientDir, localName);
+      const destPub = path.join(PUB_CLIENTS, safeId, localName);
+      await downloadImage(featureImageUrls[i], destClient);
+      fs.copyFileSync(destClient, destPub);
+      savedFeature.push({ original: featureImageUrls[i], local: `/clients/${safeId}/${localName}` });
+      console.log(`  📸 Saved feature image ${i}: ${localName}`);
+    } catch (e) {
+      console.warn(`  ⚠️  Failed to download feature image ${i}: ${e.message}`);
+    }
+  }
+
+  // Save image URLs in brand identity
+  brand.heroImages = savedHero.map(h => h.local);
+  brand.featureImages = savedFeature.map(f => f.local);
+  brand.heroImageOriginals = heroImageUrls;
+  brand.featureImageOriginals = featureImageUrls;
+  brand.allImages = allImageUrls;
+
+  fs.writeFileSync(path.join(clientDir, 'brand-identity.json'), JSON.stringify(brand, null, 2));
   res.json({ success: true, brand });
 });
 
@@ -1555,20 +1738,34 @@ app.post('/api/render', async (req, res) => {
 
         emitProgress(jobId, 'progress', { step: 3, total: 4, label: `🎞 Concatenando ${resolvedPaths.length} clips con fade...`, percent: 55 });
 
-        if (resolvedPaths.length === 1) {
-          await execFileAsync(FFMPEG, ['-y', '-i', resolvedPaths[0], '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-crf', '18', '-preset', 'fast', '-c:a', 'aac', '-b:a', '128k', outPath], { timeout: 600000 });
+        // Normalize all clips to same resolution, fps, and pixel format before xfade
+        const normalizedPaths = [];
+        for (let i = 0; i < resolvedPaths.length; i++) {
+          const normPath = path.join(tmpDir, `norm-${i}.mp4`);
+          const scaleFilter = format === '16:9' ? 'scale=1920:1080' : format === '1:1' ? 'scale=1080:1080' : 'scale=1080:1920';
+          await execFileAsync(FFMPEG, [
+            '-y', '-i', resolvedPaths[i],
+            '-vf', `${scaleFilter}:force_original_aspect_ratio=decrease,pad=${scaleFilter.split('=')[1]}:(ow-iw)/2:(oh-ih)/2,setsar=1,fps=30`,
+            '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-crf', '18', '-preset', 'fast',
+            '-an', normPath
+          ], { timeout: 120000 });
+          normalizedPaths.push(normPath);
+        }
+
+        if (normalizedPaths.length === 1) {
+          await execFileAsync(FFMPEG, ['-y', '-i', normalizedPaths[0], '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-crf', '18', '-preset', 'fast', '-an', outPath], { timeout: 600000 });
         } else {
-          const durations = await Promise.all(resolvedPaths.map(getClipDuration));
+          const durations = await Promise.all(normalizedPaths.map(getClipDuration));
           const fadeDuration = 0.5;
           try {
-            const inputs = resolvedPaths.flatMap(p => ['-i', p]);
+            const inputs = normalizedPaths.flatMap(p => ['-i', p]);
             const filterParts = [];
             let prevLabel = '[0:v]';
             let cumulativeDur = 0;
-            for (let i = 1; i < resolvedPaths.length; i++) {
-              cumulativeDur += durations[i - 1];
+            for (let i = 1; i < normalizedPaths.length; i++) {
+              cumulativeDur += durations[i - 1] - (i > 1 ? fadeDuration : 0);
               const offset = Math.max(0, cumulativeDur - fadeDuration);
-              const outLabel = i === resolvedPaths.length - 1 ? '[vout]' : `[xfade${i}]`;
+              const outLabel = i === normalizedPaths.length - 1 ? '[vout]' : `[xfade${i}]`;
               filterParts.push(`${prevLabel}[${i}:v]xfade=transition=fade:duration=${fadeDuration}:offset=${offset}${outLabel}`);
               prevLabel = outLabel === `[xfade${i}]` ? `[xfade${i}]` : '[vout]';
             }
@@ -1576,22 +1773,22 @@ app.post('/api/render', async (req, res) => {
           } catch (xfadeErr) {
             console.warn('xfade failed, falling back to concat:', xfadeErr.message);
             const concatList = path.join(tmpDir, 'concat.txt');
-            fs.writeFileSync(concatList, resolvedPaths.map(p => `file '${p}'`).join('\n'));
-            await execFileAsync(FFMPEG, ['-y', '-f', 'concat', '-safe', '0', '-i', concatList, '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-crf', '20', '-preset', 'fast', '-c:a', 'aac', outPath], { timeout: 600000 });
+            fs.writeFileSync(concatList, normalizedPaths.map(p => `file '${p}'`).join('\n'));
+            await execFileAsync(FFMPEG, ['-y', '-f', 'concat', '-safe', '0', '-i', concatList, '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-crf', '20', '-preset', 'fast', '-an', outPath], { timeout: 600000 });
           }
         }
 
-        // Step 4: Mix audio over video mashup
+        // Step 4: Mix audio over video mashup (video has NO audio stream due to -an)
         if (narrationPath || bgmPath) {
           emitProgress(jobId, 'progress', { step: 4, total: 4, label: '🔗 Mezclando audio con video...', percent: 80 });
           const withAudioPath = outPath.replace('.mp4', '-final.mp4');
           const audioInputs = ['-i', outPath];
-          const filterInputs = ['[0:a]'];
-          let idx = 1;
-          if (narrationPath) { audioInputs.push('-i', narrationPath); filterInputs.push(`[${idx}:a]`); idx++; }
-          if (bgmPath) { audioInputs.push('-i', bgmPath); filterInputs.push(`[${idx}:a]`); idx++; }
+          let audioIdx = 1;
+          const amixInputs = [];
+          if (narrationPath) { audioInputs.push('-i', narrationPath); amixInputs.push(`[${audioIdx}:a]`); audioIdx++; }
+          if (bgmPath) { audioInputs.push('-i', bgmPath); amixInputs.push(`[${audioIdx}:a]`); audioIdx++; }
           try {
-            const amixFilter = `${filterInputs.join('')}amix=inputs=${filterInputs.length}:duration=longest:dropout_transition=2[aout]`;
+            const amixFilter = `${amixInputs.join('')}amix=inputs=${amixInputs.length}:duration=longest[aout]`;
             await execFileAsync(FFMPEG, ['-y', ...audioInputs, '-filter_complex', amixFilter, '-map', '0:v', '-map', '[aout]', '-c:v', 'copy', '-c:a', 'aac', '-b:a', '192k', '-shortest', withAudioPath], { timeout: 600000 });
             fs.renameSync(withAudioPath, outPath);
           } catch (e) {
@@ -1729,13 +1926,57 @@ app.post('/api/render', async (req, res) => {
 
       emitProgress(jobId, 'progress', { step: 4, total: 5, label: `✅ ${sceneImages.filter(Boolean).length}/${scenesForRender.length} imágenes listas ✓`, percent: 71 });
 
-      // Step 4b: Generate AI video clips for scenes (only in 'veo' AI mode — very slow, 3-5min per scene)
+      // Step 4b: Generate AI video clips for scenes
       const keys = loadApiKeys();
       const aiMode = req.body.aiMode || 'template';
       const hasVideoProvider = keys.KLING_ACCESS_KEY || keys.RUNWAY_API_KEY || keys.FAL_API_KEY || keys.REPLICATE_API_KEY;
       let sceneVideoUrls = [];
 
-      if (hasVideoProvider && aiMode === 'veo') {
+      // Template mode: if brand has hero images, generate video clips FROM those images (image-to-video)
+      const brandHeroImgs = brand.heroImages || [];
+      const brandFeatureImgs = brand.featureImages || [];
+      const brandAllImgs = [...brandHeroImgs, ...brandFeatureImgs];
+
+      if (hasVideoProvider && aiMode === 'template' && brandAllImgs.length > 0) {
+        emitProgress(jobId, 'progress', { step: 4, total: 5, label: '🎬 Generando clips de video desde imágenes de marca...', percent: 72 });
+
+        for (let i = 0; i < scenesForRender.length; i++) {
+          const scene = scenesForRender[i];
+          const visualPrompt = scene.visual_prompt || scene.title || '';
+          // Pick a brand image: cycle through hero first, then feature
+          const brandImgPath = brandAllImgs[i % brandAllImgs.length];
+          // Resolve to full URL for Runway
+          const brandImgUrl = brandImgPath.startsWith('http') ? brandImgPath : `${BASE_URL}${brandImgPath}`;
+          // Also try the original remote URL (better for Runway which needs a public URL)
+          const originals = [...(brand.heroImageOriginals || []), ...(brand.featureImageOriginals || [])];
+          const bestImgUrl = originals[i % originals.length] || brandImgUrl;
+
+          try {
+            emitProgress(jobId, 'progress', { step: 4, total: 5, label: `🎬 Brand video clip ${i + 1}/${scenesForRender.length}...`, percent: 72 + Math.round((i / scenesForRender.length) * 10) });
+            const result = await generateBrandVideoClip({
+              imageUrl: bestImgUrl,
+              prompt: `${visualPrompt}, ${brand.displayName} brand, cinematic commercial`,
+              format, jobId, index: i,
+            });
+            if (result?.path) {
+              const videoDir = path.join(PUBLIC_DIR, 'assets', 'clips', jobId);
+              fs.mkdirSync(videoDir, { recursive: true });
+              const dest = path.join(videoDir, `scene-${i}.mp4`);
+              fs.copyFileSync(result.path, dest);
+              sceneVideoUrls.push(`${BASE_URL}/assets/clips/${jobId}/scene-${i}.mp4`);
+            } else {
+              sceneVideoUrls.push(null);
+            }
+          } catch (e) {
+            console.warn(`  ⚠️ Brand video clip ${i} failed (falling back to image):`, e.message);
+            sceneVideoUrls.push(null);
+          }
+        }
+
+        emitProgress(jobId, 'progress', { step: 4, total: 5, label: `✅ ${sceneVideoUrls.filter(Boolean).length}/${scenesForRender.length} brand video clips listos`, percent: 83 });
+      }
+      // Veo mode: full AI video generation (text-to-video, very slow 3-5min per scene)
+      else if (hasVideoProvider && aiMode === 'veo') {
         emitProgress(jobId, 'progress', { step: 4, total: 5, label: '🎬 Generando clips de video AI...', percent: 72 });
 
         for (let i = 0; i < scenesForRender.length; i++) {
@@ -1930,10 +2171,46 @@ app.post('/api/render/graphic', async (req, res) => {
   const hasImageProvider = !!(aiKeys.RUNWAY_API_KEY || aiKeys.GEMINI_API_KEY || aiKeys.OPENAI_API_KEY || aiKeys.PEXELS_API_KEY);
   const shouldUseAiBg = useAiBg !== undefined ? useAiBg : hasImageProvider;
 
-  // Generate AI background (local path → copy to public/assets → serve via BASE_URL)
+  // Check for scraped brand images first — use real brand imagery when available
   let bgImageUrl = imageUrl || null;
+  if (!bgImageUrl && Array.isArray(brand.heroImages) && brand.heroImages.length > 0) {
+    // Use the first available hero image as background
+    const heroImgPath = brand.heroImages[0];
+    const heroFullPath = path.join(PUBLIC_DIR, heroImgPath.replace(/^\//, ''));
+    if (fs.existsSync(heroFullPath)) {
+      bgImageUrl = `${BASE_URL}${heroImgPath}`;
+      console.log(`  📸 Using scraped hero image as background: ${bgImageUrl}`);
+    }
+  }
+  if (!bgImageUrl && Array.isArray(brand.featureImages) && brand.featureImages.length > 0) {
+    const featImgPath = brand.featureImages[0];
+    const featFullPath = path.join(PUBLIC_DIR, featImgPath.replace(/^\//, ''));
+    if (fs.existsSync(featFullPath)) {
+      bgImageUrl = `${BASE_URL}${featImgPath}`;
+      console.log(`  📸 Using scraped feature image as background: ${bgImageUrl}`);
+    }
+  }
+
+  // Generate AI background if no scraped images available (local path → copy to public/assets → serve via BASE_URL)
   if (shouldUseAiBg && !bgImageUrl) {
     try {
+      // If brand has hero image originals, use Runway to create cinematic version
+      const heroOriginal = brand.heroImageOriginals?.[0] || null;
+      if (heroOriginal && aiKeys.RUNWAY_API_KEY) {
+        console.log(`  🎬 Generating cinematic AI version of hero image via Runway...`);
+        const cinematicPrompt = `Cinematic, professional ${type} scene inspired by this brand image. ${brand.displayName}. Epic lighting, editorial quality, no text.`;
+        try {
+          const videoUrl = await generateWithRunway(cinematicPrompt, heroOriginal, '1:1', aiKeys.RUNWAY_API_KEY);
+          if (videoUrl) {
+            // We got a video — take a screenshot frame by downloading and extracting, or use the first frame URL
+            // For now, fall through to standard AI background since Runway i2v gives video not image
+            console.log(`  ℹ️  Runway cinematic video generated, falling back to image gen for graphic bg`);
+          }
+        } catch (e) {
+          console.warn(`  ⚠️  Runway cinematic generation failed: ${e.message}`);
+        }
+      }
+
       console.log(`  🎨 Generating AI background [${imageProvider}] for graphic type="${type}"...`);
       const localBgPath = await generateAiBackground(brand, type, aiKeys, imageProvider);
       // Copy to public/assets/graphics so Remotion's Chromium can fetch it via HTTP
@@ -2206,35 +2483,64 @@ app.post('/api/render/graphic-variants', async (req, res) => {
     const brandObj  = { clientId: brand.clientId, displayName: brand.displayName, colors: brand.colors, fonts: brand.fonts, gradient: brand.gradient, website: brand.website || '' };
     const results   = [];
 
-    // Generate 1 AI background and reuse across variants
+    // Collect scraped brand images for variant backgrounds
+    const brandHeroImages = (brand.heroImages || []).map(p => {
+      const full = path.join(PUBLIC_DIR, p.replace(/^\//, ''));
+      return fs.existsSync(full) ? `${BASE_URL}${p}` : null;
+    }).filter(Boolean);
+    const brandFeatureImages = (brand.featureImages || []).map(p => {
+      const full = path.join(PUBLIC_DIR, p.replace(/^\//, ''));
+      return fs.existsSync(full) ? `${BASE_URL}${p}` : null;
+    }).filter(Boolean);
+    const allBrandImages = [...brandHeroImages, ...brandFeatureImages];
+
+    // Generate 1 AI background and reuse across variants (only if no scraped images)
     const aiKeys = loadApiKeys();
     let sharedBgUrl = null;
-    try {
-      const localBgPath = await generateAiBackground(brand, 'post', aiKeys);
-      const bgDir = path.join(PUBLIC_DIR, 'assets', 'graphics');
-      fs.mkdirSync(bgDir, { recursive: true });
-      const bgFilename = `bg-variants-${clientId}-${timestamp}.jpg`;
-      fs.copyFileSync(localBgPath, path.join(bgDir, bgFilename));
-      try { fs.unlinkSync(localBgPath); } catch (_) {}
-      sharedBgUrl = `${BASE_URL}/assets/graphics/${bgFilename}`;
-      console.log(`  ✅ Shared AI background for variants: ${sharedBgUrl}`);
-    } catch (e) {
-      console.warn(`  ⚠️  AI background for variants failed (using CSS): ${e.message}`);
+    if (allBrandImages.length === 0) {
+      try {
+        const localBgPath = await generateAiBackground(brand, 'post', aiKeys);
+        const bgDir = path.join(PUBLIC_DIR, 'assets', 'graphics');
+        fs.mkdirSync(bgDir, { recursive: true });
+        const bgFilename = `bg-variants-${clientId}-${timestamp}.jpg`;
+        fs.copyFileSync(localBgPath, path.join(bgDir, bgFilename));
+        try { fs.unlinkSync(localBgPath); } catch (_) {}
+        sharedBgUrl = `${BASE_URL}/assets/graphics/${bgFilename}`;
+        console.log(`  ✅ Shared AI background for variants: ${sharedBgUrl}`);
+      } catch (e) {
+        console.warn(`  ⚠️  AI background for variants failed (using CSS): ${e.message}`);
+      }
+    } else {
+      console.log(`  📸 Using ${allBrandImages.length} scraped brand images for variant backgrounds`);
     }
 
     for (let i = 0; i < selected.length; i++) {
       const v = selected[i];
       const DIMS = { post: { w: 1080, h: 1080 }, quote: { w: 1080, h: 1080 }, stats: { w: 1080, h: 1080 }, banner: { w: 1920, h: 1080 }, story: { w: 1080, h: 1920 } };
       const { w, h } = DIMS[v.type] || DIMS.post;
-      const useBg = sharedBgUrl && (v.bgStyle === 'dark' || v.bgStyle === 'gradient' || v.bgStyle === 'mesh');
-      const effectiveBgStyle = useBg ? 'image' : v.bgStyle;
-      const props = { type: v.type, bgStyle: effectiveBgStyle, headline, subheadline, body, cta, stats: [], quoteAuthor: '', imageUrl: useBg ? sharedBgUrl : null, logoUrl: null, animated: false, brand: brandObj };
+
+      // Pick background: rotate through brand images, hero for first variants, feature for others
+      let variantBgUrl = null;
+      if (allBrandImages.length > 0) {
+        // First half of variants use hero images, second half use feature images
+        if (i < Math.ceil(selected.length / 2) && brandHeroImages.length > 0) {
+          variantBgUrl = brandHeroImages[i % brandHeroImages.length];
+        } else if (brandFeatureImages.length > 0) {
+          variantBgUrl = brandFeatureImages[i % brandFeatureImages.length];
+        } else {
+          variantBgUrl = allBrandImages[i % allBrandImages.length];
+        }
+      }
+
+      const bgUrl = variantBgUrl || (sharedBgUrl && (v.bgStyle === 'dark' || v.bgStyle === 'gradient' || v.bgStyle === 'mesh') ? sharedBgUrl : null);
+      const effectiveBgStyle = bgUrl ? 'image' : v.bgStyle;
+      const props = { type: v.type, bgStyle: effectiveBgStyle, headline, subheadline, body, cta, stats: [], quoteAuthor: '', imageUrl: bgUrl, bgImageUrl: bgUrl, logoUrl: null, animated: false, brand: brandObj };
       const oc = { ...comp, width: w, height: h, durationInFrames: 1, fps: 30, defaultProps: props, props };
       const fname = `variant-${clientId}-${timestamp}-${i + 1}.png`;
       const outPath = path.join(GRAPHICS_DIR, fname);
       try {
         await renderStill({ composition: oc, serveUrl, output: outPath, inputProps: props, imageFormat: 'png', scale: 2, chromiumOptions: { headless: true, disableWebSecurity: true }, ...(BROWSER_EXECUTABLE ? { browserExecutable: BROWSER_EXECUTABLE } : {}) });
-        results.push({ label: v.label, type: v.type, bgStyle: v.bgStyle, url: `/graphics/${fname}` });
+        results.push({ label: v.label, type: v.type, bgStyle: v.bgStyle, url: `/graphics/${fname}`, brandImage: variantBgUrl || null });
       } catch (e) {
         results.push({ label: v.label, type: v.type, bgStyle: v.bgStyle, error: e.message });
       }

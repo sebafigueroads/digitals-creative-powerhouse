@@ -385,17 +385,12 @@ async function generateSceneImage({ scene, brand, tone, format, index, jobId, im
     return destPath;
   } : null;
 
-  if (imageProvider === 'runway') {
-    if (runwayProvider) allProviders.push(runwayProvider);
-    if (geminiProvider) allProviders.push(geminiProvider);
-  } else if (imageProvider === 'gemini') {
-    if (geminiProvider) allProviders.push(geminiProvider);
-    if (runwayProvider) allProviders.push(runwayProvider);
-  } else {
-    // auto: Runway first (reliable, premium quality), Gemini second (free tier has strict quotas)
-    if (runwayProvider) allProviders.push(runwayProvider);
-    if (geminiProvider) allProviders.push(geminiProvider);
+  // Runway always first (reliable paid API). Gemini only if explicitly requested (free tier has 0 image quota).
+  if (imageProvider === 'gemini' && geminiProvider) {
+    allProviders.push(geminiProvider);
   }
+  if (runwayProvider) allProviders.push(runwayProvider);
+  if (imageProvider !== 'gemini' && geminiProvider) allProviders.push(geminiProvider); // last resort
 
   if (keys.STABILITY_API_KEY) allProviders.push(async () => {
     console.log(`  🎨 Scene ${index}: Stability AI`);
@@ -1477,6 +1472,146 @@ app.post('/api/clients/:id/upload-logo', upload.single('logo'), (req, res) => {
 
 // ── Main render pipeline ──────────────────────────────────────────────────────
 app.post('/api/render', async (req, res) => {
+  const aiMode = req.body.aiMode || 'template';
+  const clientVideos = req.body.clientVideos || [];
+
+  // ── MASHUP MODE: route to video mashup handler ──
+  if (aiMode === 'mashup' && clientVideos.length > 0) {
+    const { clientId, scenes: scenesFromClient, format = '9:16', durationSeconds = 21, script, apiKey, audioMode = 'both', musicMood, sfxOnCta } = req.body;
+    if (!clientId) return res.status(400).json({ success: false, error: 'clientId required for mashup' });
+
+    const elKey = resolveElKey(apiKey);
+    const mashupMode = req.body.mashupMode || 'intelligent';
+    const jobId = `mashup-${clientId}-${Date.now()}`;
+    createJob(jobId);
+    res.json({ success: true, jobId, message: 'Mashup render started' });
+
+    (async () => {
+      try {
+        const tmpDir = path.join(__dirname, '.tmp', jobId);
+        fs.mkdirSync(tmpDir, { recursive: true });
+        const keys = loadApiKeys();
+
+        // Step 1: Narration (if script provided)
+        let narrationPath = null;
+        if (script && elKey && audioMode !== 'music') {
+          emitProgress(jobId, 'progress', { step: 1, total: 4, label: '🎙 Generando narración...', percent: 5 });
+          const buf = await ttsNarration(script, elKey);
+          narrationPath = path.join(tmpDir, 'narration.mp3');
+          fs.writeFileSync(narrationPath, buf);
+        }
+
+        // Step 2: Background music
+        let bgmPath = null;
+        if (audioMode !== 'narration' && elKey) {
+          emitProgress(jobId, 'progress', { step: 2, total: 4, label: '🎵 Generando música...', percent: 20 });
+          const moodKey = musicMood || 'Cinematic';
+          const moodPrompt = MUSIC_PROMPTS[moodKey] || MUSIC_PROMPTS.Cinematic;
+          const buf = await generateSound(moodPrompt, Math.min(Math.ceil(Number(durationSeconds) + 2), 22), elKey);
+          bgmPath = path.join(tmpDir, 'bgm.mp3');
+          fs.writeFileSync(bgmPath, buf);
+        }
+
+        // Step 3: Assemble video clips
+        emitProgress(jobId, 'progress', { step: 3, total: 4, label: '🎬 Ensamblando clips de video...', percent: 40 });
+
+        let videoAssignments;
+        if (mashupMode === 'manual') {
+          videoAssignments = clientVideos.map((file, i) => ({ sceneIndex: i, videoFile: file }));
+        } else {
+          try {
+            videoAssignments = await assignVideosWithGemini(scenesFromClient || [], clientVideos, keys);
+          } catch (e) {
+            console.warn('Intelligent assignment failed, using manual order:', e.message);
+            videoAssignments = clientVideos.map((file, i) => ({ sceneIndex: i, videoFile: file }));
+          }
+        }
+
+        if (!videoAssignments.length) throw new Error('No video clips available — upload videos first');
+
+        const resolvedPaths = videoAssignments.map(a => {
+          const p1 = path.join(ASSETS_DIR, clientId, a.videoFile);
+          const p2 = path.join(ASSETS_DIR, 'uploads', a.videoFile);
+          if (fs.existsSync(p1)) return p1;
+          if (fs.existsSync(p2)) return p2;
+          if (path.isAbsolute(a.videoFile) && fs.existsSync(a.videoFile)) return a.videoFile;
+          console.warn(`  ⚠️  Video not found: ${a.videoFile}`);
+          return null;
+        }).filter(Boolean);
+
+        if (!resolvedPaths.length) throw new Error('No valid video files found at expected paths');
+
+        const timestamp = Date.now();
+        const filename = `mashup-${clientId}-${timestamp}.mp4`;
+        const outPath = path.join(RENDERS_DIR, filename);
+        const FFPROBE = FFMPEG.replace(/ffmpeg$/, 'ffprobe');
+
+        async function getClipDuration(filePath) {
+          try {
+            const { stdout } = await execFileAsync(FFPROBE, ['-v', 'quiet', '-print_format', 'json', '-show_format', filePath], { timeout: 30000 });
+            return parseFloat(JSON.parse(stdout).format?.duration) || 5;
+          } catch (_) { return 5; }
+        }
+
+        emitProgress(jobId, 'progress', { step: 3, total: 4, label: `🎞 Concatenando ${resolvedPaths.length} clips con fade...`, percent: 55 });
+
+        if (resolvedPaths.length === 1) {
+          await execFileAsync(FFMPEG, ['-y', '-i', resolvedPaths[0], '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-crf', '18', '-preset', 'fast', '-c:a', 'aac', '-b:a', '128k', outPath], { timeout: 600000 });
+        } else {
+          const durations = await Promise.all(resolvedPaths.map(getClipDuration));
+          const fadeDuration = 0.5;
+          try {
+            const inputs = resolvedPaths.flatMap(p => ['-i', p]);
+            const filterParts = [];
+            let prevLabel = '[0:v]';
+            let cumulativeDur = 0;
+            for (let i = 1; i < resolvedPaths.length; i++) {
+              cumulativeDur += durations[i - 1];
+              const offset = Math.max(0, cumulativeDur - fadeDuration);
+              const outLabel = i === resolvedPaths.length - 1 ? '[vout]' : `[xfade${i}]`;
+              filterParts.push(`${prevLabel}[${i}:v]xfade=transition=fade:duration=${fadeDuration}:offset=${offset}${outLabel}`);
+              prevLabel = outLabel === `[xfade${i}]` ? `[xfade${i}]` : '[vout]';
+            }
+            await execFileAsync(FFMPEG, ['-y', ...inputs, '-filter_complex', filterParts.join(';'), '-map', '[vout]', '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-crf', '18', '-preset', 'fast', '-an', outPath], { timeout: 600000 });
+          } catch (xfadeErr) {
+            console.warn('xfade failed, falling back to concat:', xfadeErr.message);
+            const concatList = path.join(tmpDir, 'concat.txt');
+            fs.writeFileSync(concatList, resolvedPaths.map(p => `file '${p}'`).join('\n'));
+            await execFileAsync(FFMPEG, ['-y', '-f', 'concat', '-safe', '0', '-i', concatList, '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-crf', '20', '-preset', 'fast', '-c:a', 'aac', outPath], { timeout: 600000 });
+          }
+        }
+
+        // Step 4: Mix audio over video mashup
+        if (narrationPath || bgmPath) {
+          emitProgress(jobId, 'progress', { step: 4, total: 4, label: '🔗 Mezclando audio con video...', percent: 80 });
+          const withAudioPath = outPath.replace('.mp4', '-final.mp4');
+          const audioInputs = ['-i', outPath];
+          const filterInputs = ['[0:a]'];
+          let idx = 1;
+          if (narrationPath) { audioInputs.push('-i', narrationPath); filterInputs.push(`[${idx}:a]`); idx++; }
+          if (bgmPath) { audioInputs.push('-i', bgmPath); filterInputs.push(`[${idx}:a]`); idx++; }
+          try {
+            const amixFilter = `${filterInputs.join('')}amix=inputs=${filterInputs.length}:duration=longest:dropout_transition=2[aout]`;
+            await execFileAsync(FFMPEG, ['-y', ...audioInputs, '-filter_complex', amixFilter, '-map', '0:v', '-map', '[aout]', '-c:v', 'copy', '-c:a', 'aac', '-b:a', '192k', '-shortest', withAudioPath], { timeout: 600000 });
+            fs.renameSync(withAudioPath, outPath);
+          } catch (e) {
+            console.warn('Audio mix failed (non-fatal):', e.message);
+          }
+        }
+
+        emitProgress(jobId, 'progress', { step: 4, total: 4, label: '✅ Mashup listo ✓', percent: 98 });
+        const metaPath = path.join(RENDERS_DIR, filename.replace('.mp4', '.json'));
+        fs.writeFileSync(metaPath, JSON.stringify({ clientId, format, durationSeconds, mashupMode, createdAt: new Date().toISOString() }, null, 2));
+        emitProgress(jobId, 'done', { videoUrl: `/renders/${filename}`, filename, label: '🎉 ¡Mashup completo!', format, durationSeconds });
+      } catch (err) {
+        console.error(`❌ Mashup ${jobId} failed:`, err);
+        emitProgress(jobId, 'error', { message: `Error mashup: ${err.message}` });
+      }
+    })();
+    return; // Don't continue to template/veo render
+  }
+
+  // ── TEMPLATE / VEO MODE ──
   const {
     clientId, script, musicMood, sfxOnCta, apiKey,
     format = '9:16', durationSeconds = 21, audioMode = 'both',
@@ -1738,9 +1873,8 @@ async function generateAiBackground(brand, graphicType, apiKeys, imageProvider =
     return destPath;
   };
 
-  const cascade = imageProvider === 'gemini'
-    ? [tryGemini, tryRunway]
-    : [tryRunway, tryGemini]; // auto & runway: Runway first (reliable paid), Gemini fallback
+  // Runway always first (paid, reliable). Gemini free tier has 0 image quota.
+  const cascade = [tryRunway, tryGemini];
 
   for (const fn of cascade) {
     try { return await fn(); } catch (e) { console.warn(`  ⚠️  bg provider failed: ${e.message}`); }

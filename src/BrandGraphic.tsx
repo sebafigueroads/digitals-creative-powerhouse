@@ -346,7 +346,8 @@ const Logo: React.FC<{
         style={{
           height: size,
           width: "auto",
-          maxWidth: size * 3,
+          maxWidth: size * 2.5,
+          maxHeight: size,
           objectFit: "contain",
         }}
       />

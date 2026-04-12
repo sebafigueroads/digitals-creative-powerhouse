@@ -172,10 +172,10 @@ async function downloadImage(url, destPath, retries = 3) {
  * Returns a local Buffer (PNG).
  */
 async function generateWithGeminiImagen(prompt, width, height, apiKey) {
-  // Use gemini-2.0-flash-exp (supports image generation via responseModalities).
+  // Use gemini-2.5-flash-image (dedicated image generation model).
   // Returns inline base64 image data via generateContent API.
   const res = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${apiKey}`,
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image:generateContent?key=${apiKey}`,
     {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -392,9 +392,9 @@ async function generateSceneImage({ scene, brand, tone, format, index, jobId, im
     if (geminiProvider) allProviders.push(geminiProvider);
     if (runwayProvider) allProviders.push(runwayProvider);
   } else {
-    // auto: Gemini first (fast/free), Runway second (premium quality)
-    if (geminiProvider) allProviders.push(geminiProvider);
+    // auto: Runway first (reliable, premium quality), Gemini second (free tier has strict quotas)
     if (runwayProvider) allProviders.push(runwayProvider);
+    if (geminiProvider) allProviders.push(geminiProvider);
   }
 
   if (keys.STABILITY_API_KEY) allProviders.push(async () => {
@@ -725,6 +725,60 @@ function emitProgress(jobId, type, data) {
   }
 }
 
+// ─── OpenAI Fallback Script Generator ────────────────────────────────────────
+async function generateScriptWithOpenAI({ prompt, brandName, tone, durationSeconds, rrss, creativity, brandDesc, brandFull, openaiKey }) {
+  const sceneCount = durationSeconds <= 15 ? 3 : durationSeconds <= 21 ? 4 : durationSeconds <= 30 ? 4 : durationSeconds <= 45 ? 5 : 6;
+  const wordsTarget = Math.floor(durationSeconds * 2.4);
+
+  const brandContext = [
+    brandDesc ? `Descripción: ${brandDesc}` : '',
+    brandFull?.website ? `Sitio web: ${brandFull.website}` : '',
+    brandFull?.colors?.primary ? `Color principal: ${brandFull.colors.primary}` : '',
+    `Red social: ${rrss}`, `Tono: ${tone}`, `Idioma: español latinoamericano`,
+  ].filter(Boolean).join('\n');
+
+  const systemPrompt = `Eres un Director Creativo de una agencia de élite global. Escribes guiones de video disruptivos, memorables y directos. NUNCA uses clichés. Escribe narrativa moderna, minimalista con impacto emocional real. Responde SOLO con JSON válido.`;
+
+  const userPrompt = `Escribe un guion de video de ${durationSeconds} segundos para "${brandName}".
+Contexto: ${brandContext}
+${prompt ? `Idea: ${prompt}` : ''}
+- ${sceneCount} escenas, ~${wordsTarget} palabras total
+- Cada escena: type (hook|brand|feature|cta), title (max 5 palabras), subtitle, badge, items (3 bullets), voiceover, visual_prompt (english, cinematic, no text)
+- Responde JSON: { "script": "...", "problem": "...", "benefit": "...", "category": "...", "scenes": [...] }`;
+
+  const res = await fetch('https://api.openai.com/v1/chat/completions', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${openaiKey}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      model: 'gpt-4o-mini',
+      response_format: { type: 'json_object' },
+      temperature: 0.3 + (creativity / 100) * 1.1,
+      max_tokens: 4096,
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: userPrompt },
+      ],
+    }),
+  });
+  if (!res.ok) throw new Error(`OpenAI script ${res.status}: ${await res.text()}`);
+  const data = await res.json();
+  const parsed = JSON.parse(data.choices[0].message.content);
+
+  const scenes = (parsed.scenes || []).map((s, i) => ({
+    type: s.type || (i === 0 ? 'hook' : i === parsed.scenes.length - 1 ? 'cta' : 'feature'),
+    title: s.title || '', subtitle: s.subtitle || '', badge: s.badge || '',
+    items: s.items || [], voiceover: s.voiceover || '', visual_prompt: s.visual_prompt || '',
+    sfx_instruction: s.sfx_instruction || buildSfxInstruction(s.type || 'hook'),
+    painPoints: s.items?.map(t => ({ emoji: '✓', text: t })) || [],
+  }));
+
+  let script = parsed.script || scenes.map(s => s.voiceover).join(' ');
+  const words = script.split(/\s+/);
+  if (words.length > wordsTarget) script = words.slice(0, wordsTarget).join(' ') + '.';
+
+  return { script, scenes, wordCount: script.split(/\s+/).length, problem: parsed.problem || '', benefit: parsed.benefit || '', category: parsed.category || 'general', engine: 'openai' };
+}
+
 // ─── Gemini Flash Script Generator ──────────────────────────────────────────
 
 /**
@@ -736,7 +790,7 @@ async function generateScriptWithGemini({ prompt, brandName, brandDesc, tone, du
   // Temperature: creativity 0→0.3, 100→1.4
   const temperature = 0.3 + (creativity / 100) * 1.1;
   // Try models in order: 2.0-flash → 1.5-flash → 1.5-flash-8b
-  const GEMINI_MODELS = ['gemini-2.0-flash', 'gemini-2.0-flash-lite', 'gemini-2.5-flash'];
+  const GEMINI_MODELS = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-2.0-flash-lite'];
   let model = null;
   for (const m of GEMINI_MODELS) {
     try {
@@ -746,7 +800,15 @@ async function generateScriptWithGemini({ prompt, brandName, brandDesc, tone, du
       break;
     } catch (_) { model = null; }
   }
-  if (!model) throw new Error('All Gemini models unavailable (quota exhausted)');
+  if (!model) {
+    // Fallback to OpenAI if available
+    const openaiKey = loadApiKeys().OPENAI_API_KEY;
+    if (openaiKey) {
+      console.log('  ⚠️ Gemini quota exhausted — falling back to OpenAI for script generation');
+      return await generateScriptWithOpenAI({ prompt, brandName, tone, durationSeconds, rrss, creativity, brandDesc, brandFull, openaiKey });
+    }
+    throw new Error('All Gemini models unavailable (quota exhausted) and no OpenAI fallback configured');
+  }
 
   const sceneCount = durationSeconds <= 15 ? 3 : durationSeconds <= 21 ? 4 : durationSeconds <= 30 ? 4 : durationSeconds <= 45 ? 5 : 6;
   const wordsTarget = Math.floor(durationSeconds * 2.4);
@@ -1532,12 +1594,13 @@ app.post('/api/render', async (req, res) => {
 
       emitProgress(jobId, 'progress', { step: 4, total: 5, label: `✅ ${sceneImages.filter(Boolean).length}/${scenesForRender.length} imágenes listas ✓`, percent: 71 });
 
-      // Step 4b: Generate AI video clips for scenes (if video provider available)
+      // Step 4b: Generate AI video clips for scenes (only in 'veo' AI mode — very slow, 3-5min per scene)
       const keys = loadApiKeys();
+      const aiMode = req.body.aiMode || 'template';
       const hasVideoProvider = keys.KLING_ACCESS_KEY || keys.RUNWAY_API_KEY || keys.FAL_API_KEY || keys.REPLICATE_API_KEY;
       let sceneVideoUrls = [];
 
-      if (hasVideoProvider) {
+      if (hasVideoProvider && aiMode === 'veo') {
         emitProgress(jobId, 'progress', { step: 4, total: 5, label: '🎬 Generando clips de video AI...', percent: 72 });
 
         for (let i = 0; i < scenesForRender.length; i++) {

@@ -590,10 +590,10 @@ export const ClientVideo: React.FC<ClientVideoProps> = ({
   const OUTRO_FRAMES = 45; // 1.5s logo outro
   const totalFrames = durationSeconds * fps;
   const contentFrames = totalFrames - OUTRO_FRAMES; // scene content fits before outro
-  const n           = scenes.length;
+  const n           = scenes.length || 1;
 
   // Distribute frames evenly across content (excluding outro)
-  const sceneFrames: number[] = Array.from({ length: n }, (_, i) => {
+  const sceneFrames: number[] = n === 0 ? [contentFrames] : Array.from({ length: n }, (_, i) => {
     const equal = Math.floor(contentFrames / n);
     return i < n - 1 ? equal : contentFrames - equal * (n - 1);
   });

@@ -1202,7 +1202,8 @@ async function renderVideoFrames({
     jpegQuality: 90,
     inputProps: componentProps,
     chromiumOptions: { headless: true, disableWebSecurity: true },
-    chromiumOptions: { headless: true, disableWebSecurity: true }, ...(BROWSER_EXECUTABLE ? { browserExecutable: BROWSER_EXECUTABLE } : {}),
+    ...(BROWSER_EXECUTABLE ? { browserExecutable: BROWSER_EXECUTABLE } : {}),
+    timeoutInMilliseconds: 600000,
     onFrameUpdate: (frame) => {
       if (frame % 10 === 0 && onProgress) {
         const pct = Math.round(60 + (frame / durationFrames) * 28);
@@ -1754,7 +1755,8 @@ app.post('/api/render/graphic', async (req, res) => {
         codec: 'h264',
         outputLocation: outPath,
         inputProps: graphicProps,
-        chromiumOptions: { headless: true, disableWebSecurity: true }, ...(BROWSER_EXECUTABLE ? { browserExecutable: BROWSER_EXECUTABLE } : {}),
+        chromiumOptions: { headless: true, disableWebSecurity: true },
+        ...(BROWSER_EXECUTABLE ? { browserExecutable: BROWSER_EXECUTABLE } : {}),
       });
       return res.json({ success: true, url: `/graphics/${filename}`, filename });
     }
@@ -1770,7 +1772,9 @@ app.post('/api/render/graphic', async (req, res) => {
       output: outPath,
       inputProps: graphicProps,
       imageFormat: 'png',
-      chromiumOptions: { headless: true, disableWebSecurity: true }, ...(BROWSER_EXECUTABLE ? { browserExecutable: BROWSER_EXECUTABLE } : {}),
+      scale: 2,
+      chromiumOptions: { headless: true, disableWebSecurity: true },
+      ...(BROWSER_EXECUTABLE ? { browserExecutable: BROWSER_EXECUTABLE } : {}),
     });
 
     res.json({ success: true, url: `/graphics/${filename}`, filename });
@@ -1819,7 +1823,7 @@ app.post('/api/render/carousel', async (req, res) => {
       const filename = `carousel-${clientId}-${timestamp}-${i + 1}.png`;
       const outPath  = path.join(GRAPHICS_DIR, filename);
 
-      await renderStill({ composition: overriddenComp, serveUrl, output: outPath, inputProps: graphicProps, imageFormat: 'png', chromiumOptions: { headless: true, disableWebSecurity: true }, ...(BROWSER_EXECUTABLE ? { browserExecutable: BROWSER_EXECUTABLE } : {}) });
+      await renderStill({ composition: overriddenComp, serveUrl, output: outPath, inputProps: graphicProps, imageFormat: 'png', scale: 2, chromiumOptions: { headless: true, disableWebSecurity: true }, ...(BROWSER_EXECUTABLE ? { browserExecutable: BROWSER_EXECUTABLE } : {}) });
       urls.push({ slide: i + 1, url: `/graphics/${filename}`, filename });
     }
 
@@ -1907,7 +1911,7 @@ app.post('/api/click-to-ad', async (req, res) => {
             const ts = Date.now();
             const fname = `cta-${clientId}-${gType}-${ts}.png`;
             const outP  = path.join(GRAPHICS_DIR, fname);
-            await renderStill({ composition: oc, serveUrl, output: outP, inputProps: props, imageFormat: 'png', chromiumOptions: { headless: true, disableWebSecurity: true }, ...(BROWSER_EXECUTABLE ? { browserExecutable: BROWSER_EXECUTABLE } : {}) });
+            await renderStill({ composition: oc, serveUrl, output: outP, inputProps: props, imageFormat: 'png', scale: 2, chromiumOptions: { headless: true, disableWebSecurity: true }, ...(BROWSER_EXECUTABLE ? { browserExecutable: BROWSER_EXECUTABLE } : {}) });
             graphicsResults.push({ type: gType, url: `/graphics/${fname}` });
           } catch (e) { console.warn('Click-to-Ad graphic error:', e.message); }
         }
@@ -1974,7 +1978,7 @@ app.post('/api/render/graphic-variants', async (req, res) => {
       const fname = `variant-${clientId}-${timestamp}-${i + 1}.png`;
       const outPath = path.join(GRAPHICS_DIR, fname);
       try {
-        await renderStill({ composition: oc, serveUrl, output: outPath, inputProps: props, imageFormat: 'png', chromiumOptions: { headless: true, disableWebSecurity: true }, ...(BROWSER_EXECUTABLE ? { browserExecutable: BROWSER_EXECUTABLE } : {}) });
+        await renderStill({ composition: oc, serveUrl, output: outPath, inputProps: props, imageFormat: 'png', scale: 2, chromiumOptions: { headless: true, disableWebSecurity: true }, ...(BROWSER_EXECUTABLE ? { browserExecutable: BROWSER_EXECUTABLE } : {}) });
         results.push({ label: v.label, type: v.type, bgStyle: v.bgStyle, url: `/graphics/${fname}` });
       } catch (e) {
         results.push({ label: v.label, type: v.type, bgStyle: v.bgStyle, error: e.message });
@@ -2041,7 +2045,7 @@ app.post('/api/ai-edit', async (req, res) => {
       const oc = { ...comp, width: w, height: h, durationInFrames: 1, fps: 30, defaultProps: mergedProps, props: mergedProps };
       const fname = `edited-${clientId}-${Date.now()}.png`;
       const outPath = path.join(GRAPHICS_DIR, fname);
-      await renderStill({ composition: oc, serveUrl, output: outPath, inputProps: mergedProps, imageFormat: 'png', chromiumOptions: { headless: true, disableWebSecurity: true }, ...(BROWSER_EXECUTABLE ? { browserExecutable: BROWSER_EXECUTABLE } : {}) });
+      await renderStill({ composition: oc, serveUrl, output: outPath, inputProps: mergedProps, imageFormat: 'png', scale: 2, chromiumOptions: { headless: true, disableWebSecurity: true }, ...(BROWSER_EXECUTABLE ? { browserExecutable: BROWSER_EXECUTABLE } : {}) });
       return res.json({ success: true, url: `/graphics/${fname}`, updatedProps: mergedProps });
     } catch (err) {
       return res.status(500).json({ success: false, error: err.message });
@@ -2952,7 +2956,7 @@ app.post('/api/render/content-grid', async (req, res) => {
       const outPath = path.join(GRAPHICS_DIR, fname);
 
       try {
-        await renderStill({ composition: oc, serveUrl, output: outPath, inputProps: graphicProps, imageFormat: 'png', chromiumOptions: { headless: true, disableWebSecurity: true }, ...(BROWSER_EXECUTABLE ? { browserExecutable: BROWSER_EXECUTABLE } : {}) });
+        await renderStill({ composition: oc, serveUrl, output: outPath, inputProps: graphicProps, imageFormat: 'png', scale: 2, chromiumOptions: { headless: true, disableWebSecurity: true }, ...(BROWSER_EXECUTABLE ? { browserExecutable: BROWSER_EXECUTABLE } : {}) });
         items.push({ label: `${plan.layout}-${plan.bgStyle}`, url: `/graphics/${fname}`, plan });
       } catch (e) {
         console.warn(`⚠️  Content grid render ${i + 1} failed:`, e.message);
